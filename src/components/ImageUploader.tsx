@@ -36,8 +36,8 @@ export default function ImageUploader({ onUpload, currentImage, label }: ImageUp
       })
       setPreview(base64)
       await onUpload(base64)
-    } catch {
-      setError("Failed to read file.")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to upload image.")
     } finally {
       setLoading(false)
     }
