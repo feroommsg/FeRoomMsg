@@ -1,0 +1,846 @@
+"use client"
+
+import { useState } from "react"
+import Link from "next/link"
+import Image from "next/image"
+import {
+  Shield,
+  CheckCircle,
+  Target,
+  TrendingUp,
+  Award,
+  Globe,
+  Hammer,
+  HardHat,
+  Factory,
+  Users,
+  Building2,
+  Wrench,
+  FolderOpen,
+  Package,
+  BookOpen,
+  Handshake,
+  Phone,
+  MapPin,
+  Ruler,
+  ChevronRight,
+  FileImage,
+  Mail,
+  Send,
+  ExternalLink,
+  type LucideIcon,
+} from "lucide-react"
+import { useLang } from "@/lib/lang-context"
+import HeroSection from "./HeroSection"
+import ProjectCard from "./ProjectCard"
+import PageShell from "./PageShell"
+import CatalogGallery from "./CatalogGallery"
+
+const iconMap: Record<string, LucideIcon> = {
+  Shield,
+  CheckCircle,
+  Target,
+  TrendingUp,
+  Award,
+  Globe,
+  Hammer,
+  HardHat,
+  Factory,
+  Users,
+  Building2,
+  Wrench,
+  FolderOpen,
+  Package,
+  BookOpen,
+  Handshake,
+  Phone,
+}
+
+function Icon({ name, className }: { name?: string | null; className?: string }) {
+  if (name && iconMap[name]) {
+    const IconComponent = iconMap[name]
+    return <IconComponent className={className} />
+  }
+  return <CheckCircle className={className} />
+}
+
+function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
+  return (
+    <div className="mb-12 text-center">
+      <h2 className="text-3xl font-bold text-white md:text-5xl">{title}</h2>
+      {subtitle && (
+        <p className="mx-auto mt-4 max-w-2xl text-[#e8e2d6]/60">{subtitle}</p>
+      )}
+    </div>
+  )
+}
+
+interface HomeContentProps {
+  homeContent: Record<string, any> | null
+  metrics: Record<string, any>[]
+  trustItems: Record<string, any>[]
+  capabilities: Record<string, any>[]
+  projects: Record<string, any>[]
+  sectors: Record<string, any>[]
+  settings: Record<string, any> | null
+}
+
+export function HomeContent({
+  homeContent,
+  metrics,
+  trustItems,
+  capabilities,
+  projects,
+  sectors,
+  settings,
+}: HomeContentProps) {
+  const { lang } = useLang()
+  const isAr = lang === "ar"
+
+  const badge = isAr ? homeContent?.heroBadgeAr : homeContent?.heroBadgeEn
+  const heroTitle = isAr ? homeContent?.heroTitleAr : homeContent?.heroTitleEn
+  const heroText = isAr ? homeContent?.heroTextAr : homeContent?.heroTextEn
+  const bgImage = homeContent?.heroBgImage || ""
+  const overviewTitle = isAr ? homeContent?.overviewTitleAr : homeContent?.overviewTitleEn
+  const overviewText = isAr ? homeContent?.overviewTextAr : homeContent?.overviewTextEn
+  const overviewText2 = isAr ? homeContent?.overviewText2Ar : homeContent?.overviewText2En
+
+  const heroMetrics = metrics.slice(0, 4).map((m) => ({
+    value: m.value,
+    label: isAr ? m.labelAr : m.labelEn,
+  }))
+
+  const featuredProjects = projects.filter((p) => p.isFeatured).slice(0, 3)
+
+  return (
+    <>
+      <HeroSection
+        badge={badge || (isAr ? "شركة رائدة" : "Leading Company")}
+        title={heroTitle || (isAr ? "الجدادا" : "El-Gedada")}
+        text={heroText || (isAr ? "الحلول الهندسية المتكاملة" : "Complete Engineering Solutions")}
+        metrics={heroMetrics}
+        bgImage={bgImage}
+        lang={lang}
+      />
+
+      {trustItems.length > 0 && (
+        <section className="border-b border-[#e8e2d6]/5 bg-[#11110f] px-6 py-16">
+          <div className="mx-auto max-w-7xl">
+            <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+              {trustItems.slice(0, 4).map((item, i) => (
+                <div key={i} className="flex flex-col items-center text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#c9a35c]/10">
+                    <Icon name={item.icon} className="h-6 w-6 text-[#c9a35c]" />
+                  </div>
+                  <span className="mt-3 text-sm font-semibold text-[#e8e2d6]/80">
+                    {isAr ? item.labelAr : item.labelEn}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {(overviewTitle || overviewText || overviewText2) && (
+        <section className="bg-[#0d0d0b] px-6 py-24 md:py-32">
+          <div className="mx-auto max-w-7xl">
+            <div className={`flex flex-col gap-12 lg:flex-row ${isAr ? "lg:flex-row-reverse" : ""}`}>
+              <div className="flex-1">
+                {overviewTitle && (
+                  <h2 className="text-3xl font-bold text-white md:text-5xl">{overviewTitle}</h2>
+                )}
+                {overviewText && (
+                  <p className="mt-6 text-base leading-relaxed text-[#e8e2d6]/60 md:text-lg">
+                    {overviewText}
+                  </p>
+                )}
+                {overviewText2 && (
+                  <p className="mt-4 text-base leading-relaxed text-[#e8e2d6]/60 md:text-lg">
+                    {overviewText2}
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-1 flex-col gap-6">
+                <Link
+                  href="/projects"
+                  className="group rounded-lg border border-[#e8e2d6]/10 bg-[#11110f] p-8 transition-colors hover:border-[#c9a35c]/40"
+                >
+                  <FolderOpen className="mb-3 h-8 w-8 text-[#c9a35c]" />
+                  <h3 className="text-lg font-bold text-white">
+                    {isAr ? "مشاريعنا" : "Our Projects"}
+                  </h3>
+                  <p className="mt-2 text-sm text-[#e8e2d6]/50">
+                    {isAr ? "تصفح أحدث مشاريعنا" : "Browse our latest projects"}
+                  </p>
+                </Link>
+                <Link
+                  href="/materials"
+                  className="group rounded-lg border border-[#e8e2d6]/10 bg-[#11110f] p-8 transition-colors hover:border-[#c9a35c]/40"
+                >
+                  <Package className="mb-3 h-8 w-8 text-[#c9a35c]" />
+                  <h3 className="text-lg font-bold text-white">
+                    {isAr ? "المواد" : "Materials"}
+                  </h3>
+                  <p className="mt-2 text-sm text-[#e8e2d6]/50">
+                    {isAr ? "تعرف على المواد المستخدمة" : "Explore our material selection"}
+                  </p>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {capabilities.length > 0 && (
+        <section className="border-t border-[#e8e2d6]/5 bg-[#11110f] px-6 py-24 md:py-32">
+          <div className="mx-auto max-w-7xl">
+            <SectionHeader
+              title={isAr ? "إمكانياتنا" : "Our Capabilities"}
+              subtitle={
+                isAr
+                  ? "نقدم حلولاً متكاملة في مجالات متعددة"
+                  : "Comprehensive solutions across multiple domains"
+              }
+            />
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              {capabilities.slice(0, 4).map((cap, i) => (
+                <div
+                  key={i}
+                  className="group rounded-lg border border-[#e8e2d6]/10 bg-[#0d0d0b] p-6 transition-all hover:border-[#c9a35c]/40 hover:shadow-lg hover:shadow-[#c9a35c]/5"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#c9a35c]/10">
+                    <Icon name={cap.icon} className="h-6 w-6 text-[#c9a35c]" />
+                  </div>
+                  <h3 className="mt-4 text-lg font-bold text-white">
+                    {isAr ? cap.titleAr : cap.titleEn}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-[#e8e2d6]/60">
+                    {isAr ? cap.descriptionAr : cap.descriptionEn}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-10 text-center">
+              <Link
+                href="/capabilities"
+                className="inline-flex items-center gap-2 rounded-md border border-[#e8e2d6]/20 px-6 py-3 text-sm font-semibold text-[#e8e2d6] transition-colors hover:border-[#c9a35c] hover:text-[#c9a35c]"
+              >
+                {isAr ? "عرض الكل" : "View All"}
+                <ChevronRight size={16} className={isAr ? "rotate-180" : ""} />
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {featuredProjects.length > 0 && (
+        <section className="bg-[#0d0d0b] px-6 py-24 md:py-32">
+          <div className="mx-auto max-w-7xl">
+            <SectionHeader
+              title={isAr ? "مشاريع مميزة" : "Featured Projects"}
+              subtitle={
+                isAr
+                  ? "نفخر بتقديم مجموعة من أبرز أعمالنا"
+                  : "Showcasing some of our finest work"
+              }
+            />
+            <div className="flex flex-col gap-16">
+              {featuredProjects.map((project, i) => (
+                <ProjectCard key={project.id} project={project as any} lang={lang} index={i} />
+              ))}
+            </div>
+            <div className="mt-12 text-center">
+              <Link
+                href="/projects"
+                className="inline-flex items-center gap-2 rounded-md bg-[#c9a35c] px-6 py-3 text-sm font-semibold text-[#0d0d0b] transition-colors hover:bg-[#b8922f]"
+              >
+                {isAr ? "جميع المشاريع" : "All Projects"}
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {sectors.length > 0 && (
+        <section className="border-t border-[#e8e2d6]/5 bg-[#11110f] px-6 py-24 md:py-32">
+          <div className="mx-auto max-w-7xl">
+            <SectionHeader
+              title={isAr ? "القطاعات" : "Business Sectors"}
+              subtitle={
+                isAr
+                  ? "نخدم مجموعة واسعة من القطاعات"
+                  : "Serving a wide range of industries"
+              }
+            />
+            <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
+              {sectors.map((sector, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 rounded-lg border border-[#e8e2d6]/10 bg-[#0d0d0b] px-5 py-4 transition-colors hover:border-[#c9a35c]/30"
+                >
+                  <Building2 className="h-5 w-5 flex-shrink-0 text-[#c9a35c]" />
+                  <span className="text-sm font-medium text-[#e8e2d6]/80">
+                    {isAr ? sector.nameAr : sector.nameEn}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="bg-[#0d0d0b] px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-7xl">
+          <SectionHeader
+            title={isAr ? "تصفح الموقع" : "Site Map"}
+            subtitle={
+              isAr
+                ? "استكشف جميع أقسام موقعنا"
+                : "Explore all sections of our site"
+            }
+          />
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {[
+              { href: "/company", icon: Building2, labelEn: "Company", labelAr: "الشركة" },
+              { href: "/capabilities", icon: Wrench, labelEn: "Capabilities", labelAr: "الإمكانيات" },
+              { href: "/projects", icon: FolderOpen, labelEn: "Projects", labelAr: "المشاريع" },
+              { href: "/materials", icon: Package, labelEn: "Materials", labelAr: "المواد" },
+              { href: "/catalog", icon: BookOpen, labelEn: "Catalog", labelAr: "الكتالوج" },
+              { href: "/partners", icon: Handshake, labelEn: "Partners", labelAr: "الشركاء" },
+              { href: "/contact", icon: Phone, labelEn: "Contact", labelAr: "اتصل بنا" },
+            ].map((item, i) => {
+              const IconComponent = item.icon
+              return (
+                <Link
+                  key={i}
+                  href={item.href}
+                  className="group flex items-center gap-4 rounded-lg border border-[#e8e2d6]/10 bg-[#11110f] p-5 transition-all hover:border-[#c9a35c]/40 hover:shadow-lg hover:shadow-[#c9a35c]/5"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#c9a35c]/10">
+                    <IconComponent className="h-6 w-6 text-[#c9a35c]" />
+                  </div>
+                  <span className="text-base font-semibold text-white group-hover:text-[#c9a35c]">
+                    {isAr ? item.labelAr : item.labelEn}
+                  </span>
+                  <ChevronRight
+                    size={16}
+                    className={`ml-auto text-[#e8e2d6]/30 ${isAr ? "rotate-180" : ""}`}
+                  />
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+    </>
+  )
+}
+
+interface CompanyContentProps {
+  settings: Record<string, any> | null
+  trustItems: Record<string, any>[]
+  metrics: Record<string, any>[]
+}
+
+export function CompanyContent({ settings, trustItems, metrics }: CompanyContentProps) {
+  const { lang } = useLang()
+  const isAr = lang === "ar"
+
+  const metricItems = metrics.map((m) => ({
+    value: m.value,
+    label: isAr ? m.labelAr : m.labelEn,
+  }))
+
+  return (
+    <PageShell
+      label={isAr ? "الشركة" : "Company"}
+      title={isAr ? "بروفايل الشركة" : "Company Profile"}
+      text={
+        isAr
+          ? "شركة متخصصة في الأعمال الهندسية والحدادة والمقاولات"
+          : "A specialized company in engineering works, metal fabrication, and contracting"
+      }
+      lang={lang}
+    >
+      <div className="grid gap-8 md:grid-cols-2">
+        <div className="space-y-4">
+          <h3 className="text-xl font-bold text-white">
+            {isAr ? "عن الشركة" : "About Us"}
+          </h3>
+          <p className="text-sm leading-relaxed text-[#e8e2d6]/60">
+            {isAr
+              ? "نسعى لتقديم أفضل الحلول الهندسية والمعدنية لعملائنا مع الالتزام بأعلى معايير الجودة."
+              : "We strive to provide the best engineering and metal solutions to our clients with a commitment to the highest quality standards."}
+          </p>
+          <p className="text-sm leading-relaxed text-[#e8e2d6]/60">
+            {isAr
+              ? "نمتلك فريقاً من المهندسين والفنيين المتخصصين لتنفيذ المشاريع بكفاءة واحترافية."
+              : "We have a team of specialized engineers and technicians to execute projects efficiently and professionally."}
+          </p>
+        </div>
+
+        {metricItems.length > 0 && (
+          <div className="rounded-lg border border-[#e8e2d6]/10 bg-[#0d0d0b] p-6">
+            <div className="grid grid-cols-2 gap-6">
+              {metricItems.map((m, i) => (
+                <div key={i} className="flex flex-col">
+                  <span className="text-3xl font-bold text-[#c9a35c]">{m.value}</span>
+                  <span className="mt-1 text-sm text-[#e8e2d6]/50">{m.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {trustItems.length > 0 && (
+        <div className="mt-12">
+          <h3 className="mb-8 text-xl font-bold text-white">
+            {isAr ? "لماذا تختارنا" : "Why Choose Us"}
+          </h3>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {trustItems.map((item, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-3 rounded-lg border border-[#e8e2d6]/10 bg-[#0d0d0b] p-4"
+              >
+                <Icon name={item.icon} className="h-5 w-5 flex-shrink-0 text-[#c9a35c]" />
+                <span className="text-sm text-[#e8e2d6]/80">
+                  {isAr ? item.labelAr : item.labelEn}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="mt-16 rounded-lg border border-[#c9a35c]/20 bg-[#c9a35c]/5 p-8 text-center">
+        <h3 className="text-2xl font-bold text-[#c9a35c]">
+          {isAr ? "التزامنا" : "Our Promise"}
+        </h3>
+        <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[#e8e2d6]/70">
+          {isAr
+            ? "نلتزم بتقديم أعمال عالية الجودة في الوقت المحدد وبأعلى معايير السلامة المهنية."
+            : "We are committed to delivering high-quality work on time and with the highest professional safety standards."}
+        </p>
+      </div>
+    </PageShell>
+  )
+}
+
+interface CapabilitiesContentProps {
+  capabilities: Record<string, any>[]
+  sectors: Record<string, any>[]
+}
+
+export function CapabilitiesContent({ capabilities, sectors }: CapabilitiesContentProps) {
+  const { lang } = useLang()
+  const isAr = lang === "ar"
+
+  return (
+    <PageShell
+      label={isAr ? "الإمكانيات" : "Capabilities"}
+      title={isAr ? "إمكانياتنا الهندسية" : "Our Engineering Capabilities"}
+      text={
+        isAr
+          ? "نمتلك القدرات والمعدات اللازمة لتنفيذ أصعب المشاريع"
+          : "We have the capabilities and equipment to execute the most demanding projects"
+      }
+      lang={lang}
+    >
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {capabilities.map((cap, i) => (
+          <div
+            key={i}
+            className="rounded-lg border border-[#e8e2d6]/10 bg-[#0d0d0b] p-6 transition-all hover:border-[#c9a35c]/40"
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#c9a35c]/10">
+              <Icon name={cap.icon} className="h-6 w-6 text-[#c9a35c]" />
+            </div>
+            <h3 className="mt-4 text-lg font-bold text-white">
+              {isAr ? cap.titleAr : cap.titleEn}
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-[#e8e2d6]/60">
+              {isAr ? cap.descriptionAr : cap.descriptionEn}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {sectors.length > 0 && (
+        <div className="mt-16">
+          <h3 className="mb-8 text-xl font-bold text-white">
+            {isAr ? "القطاعات التي نخدمها" : "Sectors We Serve"}
+          </h3>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {sectors.map((sector, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-3 rounded-lg border border-[#e8e2d6]/10 bg-[#0d0d0b] px-5 py-4"
+              >
+                <Building2 className="h-5 w-5 flex-shrink-0 text-[#c9a35c]" />
+                <span className="text-sm font-medium text-[#e8e2d6]/80">
+                  {isAr ? sector.nameAr : sector.nameEn}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </PageShell>
+  )
+}
+
+interface ProjectsContentProps {
+  projects: Record<string, any>[]
+}
+
+export function ProjectsContent({ projects }: ProjectsContentProps) {
+  const { lang } = useLang()
+  const isAr = lang === "ar"
+
+  return (
+    <PageShell
+      label={isAr ? "المشاريع" : "Projects"}
+      title={isAr ? "مشاريعنا" : "Our Projects"}
+      text={
+        isAr
+          ? "مجموعة من أبرز المشاريع التي قمنا بتنفيذها"
+          : "A selection of our most notable completed projects"
+      }
+      lang={lang}
+    >
+      {projects.length === 0 ? (
+        <p className="text-center text-[#e8e2d6]/40">
+          {isAr ? "لا توجد مشاريع حالياً" : "No projects available"}
+        </p>
+      ) : (
+        <div className="flex flex-col gap-16">
+          {projects.map((project, i) => (
+            <ProjectCard key={project.id} project={project as any} lang={lang} index={i} />
+          ))}
+        </div>
+      )}
+    </PageShell>
+  )
+}
+
+interface MaterialViewerProps {
+  materials: Record<string, any>[]
+}
+
+export function MaterialViewer({ materials }: MaterialViewerProps) {
+  const { lang } = useLang()
+  const isAr = lang === "ar"
+  const [selected, setSelected] = useState<Record<string, any> | null>(
+    materials.length > 0 ? materials[0] : null
+  )
+
+  if (materials.length === 0) {
+    return (
+      <PageShell
+        label={isAr ? "المواد" : "Materials"}
+        title={isAr ? "المواد المستخدمة" : "Our Materials"}
+        text={isAr ? "لا توجد مواد حالياً" : "No materials available"}
+        lang={lang}
+      >
+        <p className="py-12 text-center text-[#e8e2d6]/40">
+          {isAr ? "لا توجد مواد حالياً" : "No materials available"}
+        </p>
+      </PageShell>
+    )
+  }
+
+  return (
+    <PageShell
+      label={isAr ? "المواد" : "Materials"}
+      title={isAr ? "المواد المستخدمة" : "Our Materials"}
+      text={
+        isAr
+          ? "نستخدم أفضل المواد لضمان الجودة والمتانة"
+          : "We use the finest materials to ensure quality and durability"
+      }
+      lang={lang}
+    >
+      <div className={`flex flex-col gap-8 lg:flex-row ${isAr ? "lg:flex-row-reverse" : ""}`}>
+        <div className="w-full lg:w-80">
+          <div className="flex flex-col gap-2">
+            {materials.map((m) => {
+              const active = selected?.id === m.id
+              const name = isAr ? m.nameAr : m.nameEn
+              return (
+                <button
+                  key={m.id}
+                  onClick={() => setSelected(m)}
+                  className={`w-full rounded-lg px-4 py-3 text-left text-sm font-medium transition-all ${
+                    active
+                      ? "border border-[#c9a35c] bg-[#c9a35c]/10 text-[#c9a35c]"
+                      : "border border-[#e8e2d6]/10 bg-[#11110f] text-[#e8e2d6]/70 hover:border-[#e8e2d6]/20 hover:text-[#e8e2d6]"
+                  }`}
+                >
+                  {name}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {selected && (
+          <div className="flex-1">
+            <div className="rounded-lg border border-[#e8e2d6]/10 bg-[#11110f] overflow-hidden">
+              {selected.imageUrl && (
+                <div className="relative aspect-video w-full">
+                  <Image
+                    src={selected.imageUrl}
+                    alt={isAr ? selected.nameAr : selected.nameEn}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              )}
+              <div className="p-6">
+                <h3 className="text-xl font-bold text-white">
+                  {isAr ? selected.nameAr : selected.nameEn}
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-[#e8e2d6]/60">
+                  {isAr ? selected.descriptionAr : selected.descriptionEn}
+                </p>
+                {(selected.applicationsEn || selected.applicationsAr) && (
+                  <div className="mt-6 border-t border-[#e8e2d6]/10 pt-4">
+                    <h4 className="text-sm font-semibold uppercase tracking-wider text-[#c9a35c]">
+                      {isAr ? "التطبيقات" : "Applications"}
+                    </h4>
+                    <p className="mt-2 text-sm leading-relaxed text-[#e8e2d6]/60">
+                      {isAr ? selected.applicationsAr : selected.applicationsEn}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </PageShell>
+  )
+}
+
+interface CatalogContentProps {
+  items: Record<string, any>[]
+}
+
+export function CatalogContent({ items }: CatalogContentProps) {
+  const { lang } = useLang()
+  const isAr = lang === "ar"
+
+  const catalogItems = items.map((item) => ({
+    titleEn: item.titleEn,
+    titleAr: item.titleAr,
+    categoryEn: item.categoryEn,
+    categoryAr: item.categoryAr,
+    imageUrl: item.imageUrl,
+    showOverlay: item.showOverlay,
+  }))
+
+  return (
+    <PageShell
+      label={isAr ? "الكتالوج" : "Catalog"}
+      title={isAr ? "معرض الصور" : "Image Gallery"}
+      text={
+        isAr
+          ? "مجموعة من صور أعمالنا ومنتجاتنا"
+          : "A collection of images showcasing our work and products"
+      }
+      lang={lang}
+    >
+      {catalogItems.length === 0 ? (
+        <p className="py-12 text-center text-[#e8e2d6]/40">
+          {isAr ? "لا توجد صور حالياً" : "No images available"}
+        </p>
+      ) : (
+        <CatalogGallery items={catalogItems} lang={lang} />
+      )}
+    </PageShell>
+  )
+}
+
+interface PartnersContentProps {
+  partners: Record<string, any>[]
+}
+
+export function PartnersContent({ partners }: PartnersContentProps) {
+  const { lang } = useLang()
+  const isAr = lang === "ar"
+
+  return (
+    <PageShell
+      label={isAr ? "الشركاء" : "Partners"}
+      title={isAr ? "شركاؤنا" : "Our Partners"}
+      text={
+        isAr
+          ? "نفتخر بالتعاون مع أفضل الشركات والموردين"
+          : "We are proud to collaborate with the best companies and suppliers"
+      }
+      lang={lang}
+    >
+      {partners.length === 0 ? (
+        <p className="py-12 text-center text-[#e8e2d6]/40">
+          {isAr ? "لا يوجد شركاء حالياً" : "No partners available"}
+        </p>
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {partners.map((partner, i) => (
+            <div
+              key={i}
+              className="flex flex-col items-center rounded-lg border border-[#e8e2d6]/10 bg-[#11110f] p-8 text-center transition-colors hover:border-[#c9a35c]/30"
+            >
+              {partner.logoUrl ? (
+                <div className="relative mb-4 h-20 w-20 overflow-hidden rounded-full">
+                  <Image
+                    src={partner.logoUrl}
+                    alt={isAr ? partner.nameAr : partner.nameEn}
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+              ) : (
+                <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[#c9a35c]/10">
+                  <Building2 className="h-8 w-8 text-[#c9a35c]" />
+                </div>
+              )}
+              <h3 className="text-base font-bold text-white">
+                {isAr ? partner.nameAr : partner.nameEn}
+              </h3>
+              {partner.type && (
+                <p className="mt-1 text-xs uppercase tracking-wider text-[#c9a35c]">{partner.type}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </PageShell>
+  )
+}
+
+interface ContactContentProps {
+  contact: Record<string, any> | null
+}
+
+export function ContactContent({ contact }: ContactContentProps) {
+  const { lang } = useLang()
+  const isAr = lang === "ar"
+
+  return (
+    <PageShell
+      label={isAr ? "اتصل بنا" : "Contact"}
+      title={isAr ? "تواصل معنا" : "Get in Touch"}
+      text={
+        isAr
+          ? "نرحب باستفساراتكم ونشكركم على تواصلكم"
+          : "We welcome your inquiries and appreciate your reaching out"
+      }
+      lang={lang}
+    >
+      {!contact ? (
+        <p className="py-12 text-center text-[#e8e2d6]/40">
+          {isAr ? "لا توجد معلومات اتصال متاحة" : "No contact info available"}
+        </p>
+      ) : (
+        <>
+          <div className="grid gap-6 md:grid-cols-3">
+            {contact.phone && (
+              <a
+                href={`tel:${contact.phone}`}
+                className="flex flex-col items-center rounded-lg border border-[#e8e2d6]/10 bg-[#11110f] p-8 text-center transition-colors hover:border-[#c9a35c]/30"
+              >
+                <Phone className="mb-3 h-8 w-8 text-[#c9a35c]" />
+                <span className="text-sm font-medium text-white">{contact.phone}</span>
+              </a>
+            )}
+            {contact.email && (
+              <a
+                href={`mailto:${contact.email}`}
+                className="flex flex-col items-center rounded-lg border border-[#e8e2d6]/10 bg-[#11110f] p-8 text-center transition-colors hover:border-[#c9a35c]/30"
+              >
+                <Mail className="mb-3 h-8 w-8 text-[#c9a35c]" />
+                <span className="text-sm font-medium text-white">{contact.email}</span>
+              </a>
+            )}
+            {(contact.locationEn || contact.locationAr) && (
+              <div className="flex flex-col items-center rounded-lg border border-[#e8e2d6]/10 bg-[#11110f] p-8 text-center">
+                <MapPin className="mb-3 h-8 w-8 text-[#c9a35c]" />
+                <span className="text-sm font-medium text-white">
+                  {isAr ? contact.locationAr : contact.locationEn}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {(contact.addressEn || contact.addressAr) && (
+            <div className="mt-8 rounded-lg border border-[#e8e2d6]/10 bg-[#11110f] p-6">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-[#c9a35c]">
+                {isAr ? "العنوان" : "Address"}
+              </h3>
+              <p className="mt-2 text-sm text-[#e8e2d6]/70">
+                {isAr ? contact.addressAr : contact.addressEn}
+              </p>
+            </div>
+          )}
+
+          {(contact.facebook || contact.instagram || contact.linkedin || contact.twitter) && (
+            <div className="mt-8">
+              <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[#c9a35c]">
+                {isAr ? "تواصل اجتماعي" : "Social Media"}
+              </h3>
+              <div className="flex flex-wrap gap-4">
+                {contact.facebook && (
+                  <a
+                    href={contact.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 rounded-lg border border-[#e8e2d6]/10 bg-[#11110f] px-5 py-3 text-sm text-[#e8e2d6]/70 transition-colors hover:border-[#c9a35c]/30 hover:text-[#c9a35c]"
+                  >
+                    <Globe size={16} />
+                    Facebook
+                  </a>
+                )}
+                {contact.instagram && (
+                  <a
+                    href={contact.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 rounded-lg border border-[#e8e2d6]/10 bg-[#11110f] px-5 py-3 text-sm text-[#e8e2d6]/70 transition-colors hover:border-[#c9a35c]/30 hover:text-[#c9a35c]"
+                  >
+                    <Send size={16} />
+                    Instagram
+                  </a>
+                )}
+                {contact.linkedin && (
+                  <a
+                    href={contact.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 rounded-lg border border-[#e8e2d6]/10 bg-[#11110f] px-5 py-3 text-sm text-[#e8e2d6]/70 transition-colors hover:border-[#c9a35c]/30 hover:text-[#c9a35c]"
+                  >
+                    <ExternalLink size={16} />
+                    LinkedIn
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+
+          {contact.mapEmbed && (
+            <div className="mt-8 overflow-hidden rounded-lg">
+              <div
+                className="aspect-video w-full"
+                dangerouslySetInnerHTML={{ __html: contact.mapEmbed }}
+              />
+            </div>
+          )}
+        </>
+      )}
+    </PageShell>
+  )
+}

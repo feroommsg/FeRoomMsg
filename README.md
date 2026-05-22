@@ -1,36 +1,176 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EL GEDADA - Engineering Works & Contracting Portfolio
+
+A premium international-style portfolio website for an engineering workshop and contracting company. Built with Next.js, TypeScript, Tailwind CSS, and Prisma.
+
+## Features
+
+- **Premium Design**: Dark construction/engineering theme with gold accents
+- **Bilingual**: Full English and Arabic support with RTL/LTR
+- **Public Portfolio Pages**: Home, Company, Capabilities, Projects, Materials, Catalog, Partners, Contact
+- **Admin Panel**: Separate professional admin interface at `/admin`
+- **Content Management**: Full CRUD for all website content
+- **Image Upload**: Cloudinary integration for media management
+- **SEO**: Configurable SEO settings for each page
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4
+- **Database**: PostgreSQL
+- **ORM**: Prisma
+- **Auth**: JWT-based (jose)
+- **Images**: Cloudinary
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- PostgreSQL database
+- Cloudinary account (for image uploads)
+
+### Environment Variables
+
+Copy `.env.example` to `.env` and fill in the values:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `JWT_SECRET` | Secret key for JWT token signing |
+| `ADMIN_EMAIL` | Admin login email |
+| `ADMIN_PASSWORD` | Admin login password |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name |
+| `CLOUDINARY_API_KEY` | Cloudinary API key |
+| `CLOUDINARY_API_SECRET` | Cloudinary API secret |
+| `NEXT_PUBLIC_SITE_URL` | Public site URL |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Installation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# Install dependencies
+npm install
 
-## Learn More
+# Set up database (push schema + seed data)
+npm run db:setup
 
-To learn more about Next.js, take a look at the following resources:
+# Start development server
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Creating Admin User
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The admin user is created automatically during the seed process using the `ADMIN_EMAIL` and `ADMIN_PASSWORD` environment variables.
 
-## Deploy on Vercel
+**Default credentials:**
+- Email: `admin@elgedada.com`
+- Password: `Admin@2024!`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+> Change these in production by setting the environment variables.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm start` | Start production server |
+| `npm run lint` | Run ESLint |
+| `npm run db:generate` | Generate Prisma client |
+| `npm run db:push` | Push schema to database |
+| `npm run db:seed` | Seed database with initial data |
+| `npm run db:setup` | Push schema + seed data |
+
+## Project Structure
+
+```
+src/
+  app/                    # Next.js App Router pages
+    layout.tsx            # Root layout (RTL/LTR support)
+    page.tsx              # Home page
+    company/              # Company page
+    capabilities/         # Capabilities page
+    projects/             # Projects page
+    materials/            # Materials page
+    catalog/              # Catalog gallery page
+    partners/             # Partners page
+    contact/              # Contact page
+    admin/                # Admin panel
+      login/              # Admin login
+      page.tsx            # Dashboard
+      settings/           # Site settings
+      home/               # Home content editor
+      company/            # Company content editor
+      capabilities/       # Capabilities editor
+      projects/           # Projects CRUD
+      materials/          # Materials CRUD
+      catalog/            # Catalog gallery CRUD
+      partners/           # Partners CRUD
+      contact/            # Contact info editor
+      media/              # Media library
+      seo/                # SEO settings
+  components/             # Reusable React components
+  actions/                # Server actions (API layer)
+  lib/                    # Utility functions, auth, prisma
+prisma/
+  schema.prisma           # Database schema
+  seed.ts                 # Seed data
+```
+
+## Managing Content from Admin Panel
+
+1. Navigate to `/admin` and log in
+2. Use the sidebar to navigate between content sections
+3. Each section provides:
+   - **Table view** of existing items
+   - **Add New** button to create items
+   - **Edit** button to modify items
+   - **Delete** button with confirmation
+   - **Reorder** via sort order input
+4. **Home Content**: Edit hero section, overview text
+5. **Projects**: Upload images, set featured status
+6. **Catalog**: Upload gallery images with optional overlays
+7. **Media Library**: Upload and manage images
+8. **SEO**: Set meta titles, descriptions, OG images
+
+## Deployment
+
+### Vercel (Recommended)
+
+```bash
+npm i -g vercel
+vercel
+```
+
+Set all environment variables in the Vercel dashboard.
+
+### Docker
+
+```bash
+docker build -t el-gedada-portfolio .
+docker run -p 3000:3000 el-gedada-portfolio
+```
+
+### Manual
+
+```bash
+npm run build
+npm start
+```
+
+## Design System
+
+- **Background**: `#0d0d0b` (near black)
+- **Sections**: `#11110f` (dark)
+- **Accent**: `#c9a35c` (gold)
+- **Text**: `#e8e2d6` (warm off-white)
+- **Typography**: Large headings, strong hierarchy, professional corporate feel
+- **Images**: Full-bleed, cinematic presentation
+
+## License
+
+Private - All rights reserved.

@@ -1,0 +1,199 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SiteSetting {
+  id             String   @id @default(cuid())
+  brandNameEn    String   @default("EL GEDADA")
+  brandNameAr    String   @default("الجـدادة")
+  brandSmallEn   String   @default("Engineering Works")
+  brandSmallAr   String   @default("أعمال هندسية ومقاولات")
+  logoUrl        String?
+  faviconUrl     String?
+  primaryColor   String   @default("#c9a35c")
+  bgColor        String   @default("#0d0d0b")
+  sectionBgColor String   @default("#11110f")
+  textColor      String   @default("#e8e2d6")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model HomeContent {
+  id              String   @id @default(cuid())
+  heroBgImage     String?
+  heroBadgeEn     String   @default("International Standard Engineering Portfolio")
+  heroBadgeAr     String   @default("بورتفوليو هندسي بمعايير احترافية")
+  heroTitleEn     String   @default("Engineering Precision. Contracting Excellence.")
+  heroTitleAr     String   @default("دقة هندسية. تنفيذ احترافي.")
+  heroTextEn      String   @default("A premium portfolio website for an engineering workshop and contracting company, designed to present completed work, fabrication capabilities, material expertise, partners, and professional execution standards.")
+  heroTextAr      String   @default("موقع بورتفوليو احترافي لورشة هندسية وشركة مقاولات، يعرض الأعمال المنفذة، قدرات التصنيع، خبرة اختيار الخامات، الشركاء، ومعايير التنفيذ بدون حجوزات أو فورم طلبات.")
+  overviewTitleEn String   @default("A portfolio designed to show execution strength.")
+  overviewTitleAr String   @default("بورتفوليو مصمم ليعرض قوة التنفيذ.")
+  overviewTextEn  String   @default("The home page is not only an introduction. It works as a professional entry point that quickly explains the company, highlights credibility metrics, introduces work areas, and opens every major section as a dedicated page.")
+  overviewTextAr  String   @default("الصفحة الرئيسية هنا مش مجرد واجهة، لكنها مدخل احترافي يعرف الزائر على الشركة بسرعة، يعرض أرقام الثقة، يوضح مجالات العمل، ويفتح كل قسم في صفحة مستقلة بتفاصيله.")
+  overviewText2En String?
+  overviewText2Ar String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Metric {
+  id        String   @id @default(cuid())
+  value     String   @default("+80")
+  labelEn   String   @default("Projects Delivered")
+  labelAr   String   @default("مشروع منفذ")
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TrustItem {
+  id        String   @id @default(cuid())
+  labelEn   String
+  labelAr   String
+  icon      String?
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Capability {
+  id             String   @id @default(cuid())
+  titleEn        String
+  titleAr        String
+  descriptionEn  String
+  descriptionAr  String
+  icon           String?
+  sortOrder      Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Sector {
+  id        String   @id @default(cuid())
+  nameEn    String
+  nameAr    String
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  titleEn     String
+  titleAr     String
+  categoryEn  String
+  categoryAr  String
+  locationEn  String
+  locationAr  String
+  year        String
+  size        String
+  summaryEn   String
+  summaryAr   String
+  imageUrl    String
+  isFeatured  Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Material {
+  id             String   @id @default(cuid())
+  nameEn         String
+  nameAr         String
+  descriptionEn  String
+  descriptionAr  String
+  applicationsEn String
+  applicationsAr String
+  imageUrl       String
+  sortOrder      Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model CatalogItem {
+  id          String   @id @default(cuid())
+  titleEn     String?
+  titleAr     String?
+  categoryEn  String?
+  categoryAr  String?
+  imageUrl    String
+  showOverlay Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Partner {
+  id        String   @id @default(cuid())
+  nameEn    String
+  nameAr    String
+  logoUrl   String?
+  type      String   @default("text")
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ContactInfo {
+  id        String   @id @default(cuid())
+  phone     String   @default("+20 000 000 0000")
+  email     String   @default("info@elgedadaworks.com")
+  locationEn String  @default("Cairo, Egypt")
+  locationAr String  @default("القاهرة، مصر")
+  addressEn  String?
+  addressAr  String?
+  mapEmbed  String?
+  facebook  String?
+  instagram String?
+  linkedin  String?
+  twitter   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MediaAsset {
+  id        String   @id @default(cuid())
+  url       String
+  publicId  String?
+  filename  String
+  mimeType  String
+  size      Int
+  width     Int?
+  height    Int?
+  createdAt DateTime @default(now())
+}
+
+model SeoSettings {
+  id              String   @id @default(cuid())
+  titleEn         String   @default("EL GEDADA | Engineering Works & Contracting")
+  titleAr         String   @default("الجـدادة | أعمال هندسية ومقاولات")
+  descriptionEn   String   @default("EL GEDADA is a premium engineering workshop and contracting company. View our portfolio of completed projects, fabrication capabilities, and professional execution standards.")
+  descriptionAr   String   @default("الجـدادة ورشة هندسية وشركة مقاولات محترفة. تصفح بورتفوليو المشاريع المنفذة، قدرات التصنيع، ومعايير التنفيذ الاحترافية.")
+  ogImageUrl      String?
+  keywordsEn      String?
+  keywordsAr      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
