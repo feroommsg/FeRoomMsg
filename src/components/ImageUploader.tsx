@@ -5,7 +5,7 @@ import { Upload, X, Loader2 } from "lucide-react"
 import { validateImageType, validateImageSize } from "@/lib/utils"
 
 interface ImageUploaderProps {
-  onUpload: (url: string) => void
+  onUpload: (url: string) => void | Promise<void>
   currentImage?: string
   label?: string
 }
@@ -35,7 +35,7 @@ export default function ImageUploader({ onUpload, currentImage, label }: ImageUp
         reader.readAsDataURL(file)
       })
       setPreview(base64)
-      onUpload(base64)
+      await onUpload(base64)
     } catch {
       setError("Failed to read file.")
     } finally {

@@ -67,6 +67,11 @@ export default function AdminHomePage() {
       setForm((f) => ({ ...f, heroBgImage: "" }))
       return
     }
+
+    // Persist the image even when external upload storage is not configured.
+    // If Cloudinary is available, this gets replaced with the hosted URL below.
+    setForm((f) => ({ ...f, heroBgImage: base64 }))
+
     const res = await uploadMedia(base64, "hero-bg")
     if (res.success) {
       const asset = res.data as { url: string }
