@@ -28,12 +28,7 @@ export default function ImageUploader({ onUpload, currentImage, label }: ImageUp
     }
     setLoading(true)
     try {
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = () => resolve(reader.result as string)
-        reader.onerror = reject
-        reader.readAsDataURL(file)
-      })
+      const base64 = await imageFileToDataUrl(file)
       setPreview(base64)
       await onUpload(base64)
     } catch (err) {
@@ -102,4 +97,35 @@ export default function ImageUploader({ onUpload, currentImage, label }: ImageUp
       {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
     </div>
   )
+}
+
+async function imageFileToDataUrl(file: File) {
+  const objectUrl = URL.createObjectURL(file)
+
+  try {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const img = new Image()
+      img.onload = () => resolve(img)
+      img.onerror = () => reject(new Error("This image could not be opened. Try a JPG, PNG, or WebP file."))
+      img.src = objectUrl
+    })
+
+    const maxWidth = 1800
+    const scale = Math.min(1, maxWidth / image.naturalWidth)
+    const width = Math.max(1, Math.round(image.naturalWidth * scale))
+    const height = Math.max(1, Math.round(image.naturalHeight * scale))
+
+    const canvas = document.createElement("canvas")
+    canvas.width = width
+    canvas.height = height
+
+    const ctx = canvas.getContext("2d")
+    if (!ctx) throw new Error("Image processing is not supported in this browser.")
+
+    ctx.drawImage(image, 0, 0, width, height)
+
+    return canvas.toDataURL("image/jpeg", 0.86)
+  } finally {
+    URL.revokeObjectURL(objectUrl)
+  }
 }
