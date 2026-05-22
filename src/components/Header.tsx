@@ -32,20 +32,20 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
       className={`fixed top-0 right-0 left-0 z-50 border-b border-[#e8e2d6]/5 bg-[#0d0d0b]/80 backdrop-blur-lg ${isAr ? "rtl" : "ltr"}`}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-        <Link href="/" className="flex items-center gap-3">
-          <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border border-[#c9a35c]/35 bg-[#031f3b] shadow-[0_0_22px_rgba(201,163,92,0.16)]">
+        <Link href="/" className="flex items-center gap-3.5">
+          <span className="relative h-12 w-12 shrink-0 rounded-full bg-[#031f3b] p-0.5 shadow-[0_0_26px_rgba(201,163,92,0.18)] ring-1 ring-[#c9a35c]/25">
             <Image
               src="/msg-logo.svg"
               alt={isAr ? "شعار MSG" : "MSG logo"}
               fill
               priority
-              sizes="44px"
-              className="object-cover"
+              sizes="48px"
+              className="rounded-full object-contain"
             />
           </span>
-          <span className="flex flex-col leading-none">
-            <span className="text-sm font-black tracking-wide text-white">MSG</span>
-            <span className="mt-1 hidden text-[9px] font-semibold uppercase tracking-[0.18em] text-[#c9a35c] sm:block">
+          <span className="flex flex-col justify-center leading-none">
+            <span className="text-base font-black tracking-[-0.02em] text-white">MSG</span>
+            <span className="mt-1.5 hidden text-[9px] font-black uppercase tracking-[0.34em] text-[#c9a35c] sm:block">
               {isAr ? "الورشة الهندسية" : "Engineering Works"}
             </span>
           </span>
