@@ -81,8 +81,10 @@ async function main() {
     { value: "360°", labelEn: "Execution Scope", labelAr: "نطاق تنفيذ متكامل", sortOrder: 3 },
   ]
 
-  for (const metric of metrics) {
-    await prisma.metric.create({ data: metric })
+  if ((await prisma.metric.count()) === 0) {
+    for (const metric of metrics) {
+      await prisma.metric.create({ data: metric })
+    }
   }
 
   // Trust items
@@ -93,8 +95,10 @@ async function main() {
     { labelEn: "Premium Finishing", labelAr: "تشطيب فاخر", icon: "Award", sortOrder: 3 },
   ]
 
-  for (const item of trustItems) {
-    await prisma.trustItem.create({ data: item })
+  if ((await prisma.trustItem.count()) === 0) {
+    for (const item of trustItems) {
+      await prisma.trustItem.create({ data: item })
+    }
   }
 
   // Capabilities
@@ -133,8 +137,10 @@ async function main() {
     },
   ]
 
-  for (const cap of capabilities) {
-    await prisma.capability.create({ data: cap })
+  if ((await prisma.capability.count()) === 0) {
+    for (const cap of capabilities) {
+      await prisma.capability.create({ data: cap })
+    }
   }
 
   // Sectors
@@ -149,8 +155,10 @@ async function main() {
     { nameEn: "Hospitality Spaces", nameAr: "مساحات ضيافة وفندقة", sortOrder: 7 },
   ]
 
-  for (const sector of sectors) {
-    await prisma.sector.create({ data: sector })
+  if ((await prisma.sector.count()) === 0) {
+    for (const sector of sectors) {
+      await prisma.sector.create({ data: sector })
+    }
   }
 
   // Projects
@@ -211,8 +219,10 @@ async function main() {
     },
   ]
 
-  for (const project of projects) {
-    await prisma.project.create({ data: project })
+  if ((await prisma.project.count()) === 0) {
+    for (const project of projects) {
+      await prisma.project.create({ data: project })
+    }
   }
 
   // Materials
@@ -271,8 +281,10 @@ async function main() {
     },
   ]
 
-  for (const material of materials) {
-    await prisma.material.create({ data: material })
+  if ((await prisma.material.count()) === 0) {
+    for (const material of materials) {
+      await prisma.material.create({ data: material })
+    }
   }
 
   // Catalog items
@@ -339,8 +351,10 @@ async function main() {
     },
   ]
 
-  for (const item of catalogItems) {
-    await prisma.catalogItem.create({ data: item })
+  if ((await prisma.catalogItem.count()) === 0) {
+    for (const item of catalogItems) {
+      await prisma.catalogItem.create({ data: item })
+    }
   }
 
   // Partners
@@ -353,8 +367,10 @@ async function main() {
     { nameEn: "Event & Exhibition Agencies", nameAr: "وكالات فعاليات ومعارض", type: "text", sortOrder: 5 },
   ]
 
-  for (const partner of partners) {
-    await prisma.partner.create({ data: partner })
+  if ((await prisma.partner.count()) === 0) {
+    for (const partner of partners) {
+      await prisma.partner.create({ data: partner })
+    }
   }
 
   // Contact info
