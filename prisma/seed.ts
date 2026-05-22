@@ -1,7 +1,19 @@
 import { PrismaClient } from "@prisma/client"
+import { PrismaPg } from "@prisma/adapter-pg"
 import bcrypt from "bcryptjs"
 
-const prisma = new PrismaClient()
+const databaseUrl =
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_PRISMA_URL ||
+  process.env.POSTGRES_URL ||
+  process.env.POSTGRES_URL_NON_POOLING ||
+  process.env.NEON_DATABASE_URL
+
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL or POSTGRES_URL is required to seed the database")
+}
+
+const prisma = new PrismaClient({ adapter: new PrismaPg(databaseUrl) })
 
 async function main() {
   console.log("Seeding database...")
