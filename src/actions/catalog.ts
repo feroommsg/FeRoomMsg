@@ -54,10 +54,22 @@ export async function createCatalogItem(data: {
   titleAr?: string
   categoryEn?: string
   categoryAr?: string
-  imageUrl?: string
+  images?: { imageUrl: string; isCover?: boolean; sortOrder?: number }[]
 }) {
   try {
     await requireAuth()
+
+    let coverUrl: string | undefined
+    const imageData = (data.images || []).map((img, i) => {
+      if (img.isCover || (!coverUrl && i === 0)) {
+        coverUrl = img.imageUrl
+      }
+      return {
+        imageUrl: img.imageUrl,
+        isCover: img.isCover ?? (i === 0),
+        sortOrder: img.sortOrder ?? i,
+      }
+    })
 
     const item = await prisma.catalogItem.create({
       data: {
@@ -65,8 +77,14 @@ export async function createCatalogItem(data: {
         titleAr: data.titleAr,
         categoryEn: data.categoryEn,
         categoryAr: data.categoryAr,
-        imageUrl: data.imageUrl,
+        imageUrl: coverUrl,
         showOverlay: true,
+        images: {
+          create: imageData,
+        },
+      },
+      include: {
+        images: { orderBy: { sortOrder: "asc" } },
       },
     })
 
@@ -83,10 +101,61 @@ export async function updateCatalogItem(id: string, data: {
   titleAr?: string
   categoryEn?: string
   categoryAr?: string
-  imageUrl?: string
+  images?: { imageUrl: string; isCover?: boolean; sortOrder?: number }[]
+  imageIdsToDelete?: string[]
 }) {
   try {
     await requireAuth()
+
+    const existing = await prisma.catalogItem.findUnique({
+      where: { id },
+      include: { images: true },
+    })
+    if (!existing) return error("Catalog item not found")
+
+    if (data.imageIdsToDelete?.length) {
+      await prisma.catalogImage.deleteMany({
+        where: { id: { in: data.imageIdsToDelete } },
+      })
+    }
+
+    let coverUrl: string | undefined
+    const imageData = (data.images || []).map((img, i) => ({
+      imageUrl: img.imageUrl,
+      isCover: img.isCover ?? (i === 0),
+      sortOrder: img.sortOrder ?? i,
+    }))
+    for (const img of imageData) {
+      if (img.isCover) coverUrl = img.imageUrl
+    }
+    if (!coverUrl && imageData.length > 0) coverUrl = imageData[0].imageUrl
+
+    const remainingImages = await prisma.catalogImage.findMany({ where: { catalogItemId: id } })
+    if (!coverUrl && remainingImages.length > 0) {
+      coverUrl = remainingImages[0].imageUrl
+    }
+
+    if (imageData.length > 0) {
+      await prisma.catalogImage.createMany({
+        data: imageData.map((img) => ({
+          catalogItemId: id,
+          imageUrl: img.imageUrl,
+          isCover: img.isCover,
+          sortOrder: img.sortOrder,
+        })),
+      })
+    }
+
+    const allImages = await prisma.catalogImage.findMany({
+      where: { catalogItemId: id },
+      orderBy: { sortOrder: "asc" },
+    })
+    if (allImages.length > 0 && !allImages.some((i) => i.isCover)) {
+      await prisma.catalogImage.update({
+        where: { id: allImages[0].id },
+        data: { isCover: true },
+      })
+    }
 
     const updatedItem = await prisma.catalogItem.update({
       where: { id },
@@ -95,7 +164,10 @@ export async function updateCatalogItem(id: string, data: {
         titleAr: data.titleAr,
         categoryEn: data.categoryEn,
         categoryAr: data.categoryAr,
-        imageUrl: data.imageUrl,
+        imageUrl: coverUrl,
+      },
+      include: {
+        images: { orderBy: { sortOrder: "asc" } },
       },
     })
 

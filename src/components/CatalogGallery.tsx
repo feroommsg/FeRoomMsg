@@ -10,6 +10,7 @@ interface CatalogItem {
   categoryAr: string
   imageUrl: string
   showOverlay?: boolean
+  images?: { id: string; imageUrl: string; isCover: boolean; sortOrder: number }[]
 }
 
 interface CatalogGalleryProps {
@@ -20,11 +21,20 @@ interface CatalogGalleryProps {
 export default function CatalogGallery({ items, lang }: CatalogGalleryProps) {
   const isAr = lang === "ar"
 
+  const getCoverUrl = (item: CatalogItem): string => {
+    if (item.images && item.images.length > 0) {
+      const cover = item.images.find((img) => img.isCover)
+      return cover ? cover.imageUrl : item.images[0].imageUrl
+    }
+    return item.imageUrl
+  }
+
   return (
-    <div className="grid auto-rows-[200px] grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4" dir={isAr ? "rtl" : "ltr"}>
+    <div className={`grid auto-rows-[200px] grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4`} dir={isAr ? "rtl" : "ltr"}>
       {items.map((item, i) => {
         const title = isAr ? item.titleAr : item.titleEn
         const category = isAr ? item.categoryAr : item.categoryEn
+        const coverUrl = getCoverUrl(item)
 
         const spans: string[] = []
         if (i % 5 === 0) spans.push("md:col-span-2 md:row-span-2")
@@ -37,9 +47,9 @@ export default function CatalogGallery({ items, lang }: CatalogGalleryProps) {
             href={`/catalog/${item.id}`}
             className={`group relative overflow-hidden rounded-lg ${spans.join(" ")}`}
           >
-            {item.imageUrl ? (
+            {coverUrl ? (
               <img
-                src={item.imageUrl}
+                src={coverUrl}
                 alt={title}
                 className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />

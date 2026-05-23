@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { getAllCatalogItems, createCatalogItem, updateCatalogItem, deleteCatalogItem } from "@/actions"
 import { uploadMedia } from "@/actions/media"
-import ImageUploader from "@/components/ImageUploader"
+import MultiImageUploader, { type ImageEntry } from "@/components/MultiImageUploader"
 import AdminTable from "@/components/AdminTable"
 import { Loader2, X } from "lucide-react"
 
@@ -16,25 +16,28 @@ interface CatalogItem {
   imageUrl: string | null
   showOverlay: boolean
   sortOrder: number
+  images?: { id: string; imageUrl: string; isCover: boolean; sortOrder: number }[]
 }
 
 const emptyForm = {
   titleEn: "", titleAr: "", categoryEn: "", categoryAr: "",
-  imageUrl: "", showOverlay: true, sortOrder: 0,
+  showOverlay: true, sortOrder: 0,
 }
 
 export default function AdminCatalogPage() {
   const [items, setItems] = useState<CatalogItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [modal, setModal] = useState<{ item?: CatalogItem } & typeof emptyForm | null>(null)
+  const [modal, setModal] = useState<{ item?: CatalogItem; titleEn: string; titleAr: string; categoryEn: string; categoryAr: string; showOverlay: boolean; sortOrder: number; images: ImageEntry[] } | null>(null)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
-  const imageRef = useRef<string>("")
 
   const load = async () => {
     const res = await getAllCatalogItems()
-    if (res.success) setItems((res.data as CatalogItem[]) ?? [])
+    if (res.success) {
+      const data = (res.data as CatalogItem[]) ?? []
+      setItems(data)
+    }
     setLoading(false)
   }
 
@@ -49,12 +52,33 @@ export default function AdminCatalogPage() {
     if (!modal) return
     setSaving(true)
     setSaveError(null)
+    setUploadError(null)
 
-    let imageUrl = imageRef.current
-    if (imageUrl && imageUrl.startsWith("data:")) {
-      const res = await uploadMedia(imageUrl, "catalog")
-      if (res.success) {
-        imageUrl = (res.data as { url: string }).url
+    const newImages: { imageUrl: string; isCover: boolean; sortOrder: number }[] = []
+    const imageIdsToDelete: string[] = []
+
+    for (const img of modal.images) {
+      let url = img.imageUrl
+      if (url.startsWith("data:")) {
+        const res = await uploadMedia(url, "catalog")
+        if (res.success) {
+          url = (res.data as { url: string }).url
+        } else {
+          setUploadError(res.error || "Image upload failed")
+          setSaving(false)
+          return
+        }
+      }
+      newImages.push({ imageUrl: url, isCover: img.isCover, sortOrder: img.sortOrder })
+    }
+
+    if (modal.item) {
+      const existingIds = new Set((modal.item.images || []).map((i) => i.id))
+      const currentIds = new Set(modal.images.map((i) => i.id).filter(Boolean))
+      for (const id of existingIds) {
+        if (!currentIds.has(id)) {
+          imageIdsToDelete.push(id)
+        }
       }
     }
 
@@ -63,15 +87,13 @@ export default function AdminCatalogPage() {
       titleAr: modal.titleAr || undefined,
       categoryEn: modal.categoryEn || undefined,
       categoryAr: modal.categoryAr || undefined,
-      imageUrl: imageUrl || modal.imageUrl || undefined,
+      images: newImages,
+      imageIdsToDelete: imageIdsToDelete.length > 0 ? imageIdsToDelete : undefined,
     }
 
-    let res
-    if (modal.item) {
-      res = await updateCatalogItem(modal.item.id, data as any)
-    } else {
-      res = await createCatalogItem(data as any)
-    }
+    const res = modal.item
+      ? await updateCatalogItem(modal.item.id, data as any)
+      : await createCatalogItem(data as any)
 
     if (!res.success) {
       setSaveError(res.error || "Save failed")
@@ -79,47 +101,31 @@ export default function AdminCatalogPage() {
       return
     }
 
-    imageRef.current = ""
     setSaving(false)
     setModal(null)
     load()
   }
 
-  const handleImageUpload = async (base64: string) => {
-    setUploadError(null)
-    if (!base64) {
-      imageRef.current = ""
-      setModal((m) => m ? { ...m, imageUrl: "" } : null)
-      return
-    }
-    imageRef.current = base64
-    setModal((m) => m ? { ...m, imageUrl: base64 } : null)
-    const res = await uploadMedia(base64, "catalog")
-    if (res.success) {
-      const url = (res.data as { url: string }).url
-      imageRef.current = url
-      setModal((m) => m ? { ...m, imageUrl: url } : null)
-    } else {
-      setUploadError(res.error || "Upload failed")
-    }
-  }
-
   const openCreate = () => {
-    imageRef.current = ""
-    setModal({ ...emptyForm, sortOrder: items.length })
+    setModal({ ...emptyForm, sortOrder: items.length, images: [] })
   }
 
   const openEdit = (item: CatalogItem) => {
-    imageRef.current = item.imageUrl || ""
+    const images: ImageEntry[] = (item.images || []).map((img, i) => ({
+      id: img.id,
+      imageUrl: img.imageUrl,
+      isCover: img.isCover,
+      sortOrder: img.sortOrder ?? i,
+    }))
     setModal({
       item,
       titleEn: item.titleEn || "",
       titleAr: item.titleAr || "",
       categoryEn: item.categoryEn || "",
       categoryAr: item.categoryAr || "",
-      imageUrl: item.imageUrl || "",
       showOverlay: item.showOverlay,
       sortOrder: item.sortOrder,
+      images,
     })
   }
 
@@ -130,11 +136,16 @@ export default function AdminCatalogPage() {
       <AdminTable
         columns={[
           {
-            key: "imageUrl",
+            key: "images",
             label: "Image",
             render: (item) => {
               const c = item as CatalogItem
-              return c.imageUrl ? (
+              const cover = (c.images || []).find((img) => img.isCover) || (c.images || [])[0]
+              return cover ? (
+                <div className="h-10 w-10 overflow-hidden rounded">
+                  <img src={cover.imageUrl} alt="" className="h-full w-full object-cover" />
+                </div>
+              ) : c.imageUrl ? (
                 <div className="h-10 w-10 overflow-hidden rounded">
                   <img src={c.imageUrl} alt="" className="h-full w-full object-cover" />
                 </div>
@@ -145,6 +156,14 @@ export default function AdminCatalogPage() {
           },
           { key: "titleEn", label: "Title (EN)", render: (item) => (item as CatalogItem).titleEn || "-" },
           { key: "categoryEn", label: "Category (EN)", render: (item) => (item as CatalogItem).categoryEn || "-" },
+          {
+            key: "imagesCount",
+            label: "Images",
+            render: (item) => {
+              const count = ((item as CatalogItem).images || []).length
+              return <span className="text-xs text-[#e8e2d6]/50">{count}</span>
+            },
+          },
           { key: "sortOrder", label: "Order" },
         ]}
         data={items}
@@ -156,12 +175,12 @@ export default function AdminCatalogPage() {
 
       {modal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-[#e8e2d6]/10 bg-[#11110f] p-6 shadow-xl">
+          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg border border-[#e8e2d6]/10 bg-[#11110f] p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-base font-semibold text-[#e8e2d6]">
                 {modal.item ? "Edit Catalog Item" : "New Catalog Item"}
               </h3>
-              <button onClick={() => { imageRef.current = ""; setModal(null) }} className="text-[#e8e2d6]/40 hover:text-[#e8e2d6]">
+              <button onClick={() => setModal(null)} className="text-[#e8e2d6]/40 hover:text-[#e8e2d6]">
                 <X size={18} />
               </button>
             </div>
@@ -178,7 +197,12 @@ export default function AdminCatalogPage() {
               {uploadError && (
                 <p className="text-xs text-red-400">{uploadError}</p>
               )}
-              <ImageUploader label="Image" currentImage={modal.imageUrl} onUpload={handleImageUpload} />
+
+              <MultiImageUploader
+                label="Images"
+                images={modal.images}
+                onChange={(images) => setModal({ ...modal, images })}
+              />
 
               {saveError && (
                 <p className="text-sm text-red-400">{saveError}</p>
@@ -189,7 +213,7 @@ export default function AdminCatalogPage() {
                   {saving && <Loader2 className="animate-spin" size={14} />}
                   {saving ? "Saving..." : "Save"}
                 </button>
-                <button onClick={() => { imageRef.current = ""; setModal(null) }} className="rounded-md border border-[#e8e2d6]/10 px-4 py-2 text-sm text-[#e8e2d6]/60 hover:text-[#e8e2d6]">
+                <button onClick={() => setModal(null)} className="rounded-md border border-[#e8e2d6]/10 px-4 py-2 text-sm text-[#e8e2d6]/60 hover:text-[#e8e2d6]">
                   Cancel
                 </button>
               </div>
