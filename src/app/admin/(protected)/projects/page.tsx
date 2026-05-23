@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { getAllProjects, createProject, updateProject, deleteProject, toggleFeatured } from "@/actions"
 import { uploadMedia } from "@/actions/media"
 import ImageUploader from "@/components/ImageUploader"
@@ -38,6 +38,7 @@ export default function AdminProjectsPage() {
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const imageRef = useRef<string>("")
 
   const load = async () => {
     const res = await getAllProjects()
@@ -62,13 +63,21 @@ export default function AdminProjectsPage() {
     setSaving(true)
     setSaveError(null)
 
+    let imageUrl = imageRef.current
+    if (imageUrl && imageUrl.startsWith("data:")) {
+      const res = await uploadMedia(imageUrl, "project")
+      if (res.success) {
+        imageUrl = (res.data as { url: string }).url
+      }
+    }
+
     const data = {
       titleEn: modal.titleEn, titleAr: modal.titleAr,
       categoryEn: modal.categoryEn, categoryAr: modal.categoryAr,
       locationEn: modal.locationEn, locationAr: modal.locationAr,
       year: modal.year, size: modal.size,
       summaryEn: modal.summaryEn, summaryAr: modal.summaryAr,
-      imageUrl: modal.imageUrl || undefined,
+      imageUrl: imageUrl || modal.imageUrl || undefined,
       isFeatured: modal.isFeatured, sortOrder: modal.sortOrder,
     }
 
@@ -85,6 +94,7 @@ export default function AdminProjectsPage() {
       return
     }
 
+    imageRef.current = ""
     setSaving(false)
     setModal(null)
     load()
@@ -93,24 +103,29 @@ export default function AdminProjectsPage() {
   const handleImageUpload = async (base64: string) => {
     setUploadError(null)
     if (!base64) {
+      imageRef.current = ""
       setModal((m) => m ? { ...m, imageUrl: "" } : null)
       return
     }
+    imageRef.current = base64
     setModal((m) => m ? { ...m, imageUrl: base64 } : null)
     const res = await uploadMedia(base64, "project")
     if (res.success) {
-      const asset = res.data as { url: string }
-      setModal((m) => m ? { ...m, imageUrl: asset.url } : null)
+      const url = (res.data as { url: string }).url
+      imageRef.current = url
+      setModal((m) => m ? { ...m, imageUrl: url } : null)
     } else {
       setUploadError(res.error || "Upload failed")
     }
   }
 
   const openCreate = () => {
+    imageRef.current = ""
     setModal({ ...emptyForm, sortOrder: projects.length })
   }
 
   const openEdit = (item: Project) => {
+    imageRef.current = item.imageUrl || ""
     setModal({
       item,
       titleEn: item.titleEn, titleAr: item.titleAr,
@@ -121,6 +136,11 @@ export default function AdminProjectsPage() {
       imageUrl: item.imageUrl || "",
       isFeatured: item.isFeatured, sortOrder: item.sortOrder,
     })
+  }
+
+  const closeModal = () => {
+    imageRef.current = ""
+    setModal(null)
   }
 
   return (
@@ -177,7 +197,7 @@ export default function AdminProjectsPage() {
               <h3 className="text-base font-semibold text-[#e8e2d6]">
                 {modal.item ? "Edit Project" : "New Project"}
               </h3>
-              <button onClick={() => setModal(null)} className="text-[#e8e2d6]/40 hover:text-[#e8e2d6]">
+              <button onClick={closeModal} className="text-[#e8e2d6]/40 hover:text-[#e8e2d6]">
                 <X size={18} />
               </button>
             </div>
@@ -221,7 +241,7 @@ export default function AdminProjectsPage() {
                   {saving && <Loader2 className="animate-spin" size={14} />}
                   {saving ? "Saving..." : "Save"}
                 </button>
-                <button onClick={() => setModal(null)} className="rounded-md border border-[#e8e2d6]/10 px-4 py-2 text-sm text-[#e8e2d6]/60 hover:text-[#e8e2d6]">
+                <button onClick={closeModal} className="rounded-md border border-[#e8e2d6]/10 px-4 py-2 text-sm text-[#e8e2d6]/60 hover:text-[#e8e2d6]">
                   Cancel
                 </button>
               </div>
