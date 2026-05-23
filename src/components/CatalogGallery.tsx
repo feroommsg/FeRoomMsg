@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import Link from "next/link"
 
 interface CatalogItem {
@@ -39,11 +38,10 @@ export default function CatalogGallery({ items, lang }: CatalogGalleryProps) {
             className={`group relative overflow-hidden rounded-lg ${spans.join(" ")}`}
           >
             {item.imageUrl ? (
-              <Image
+              <img
                 src={item.imageUrl}
                 alt={title}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-[#11110f]/50">

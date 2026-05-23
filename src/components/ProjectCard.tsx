@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import { MapPin, Ruler } from "lucide-react"
 
 interface Project {
@@ -47,11 +46,10 @@ export default function ProjectCard({ project, lang, index }: ProjectCardProps) 
     >
       <div className="group relative aspect-[4/3] w-full overflow-hidden rounded-lg md:w-1/2">
         {imageUrl ? (
-          <Image
+          <img
             src={imageUrl}
             alt={title}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-[#11110f]/50">

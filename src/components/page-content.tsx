@@ -704,13 +704,11 @@ export function PartnersContent({ partners }: PartnersContentProps) {
               className="flex flex-col items-center rounded-lg border border-[#e8e2d6]/10 bg-[#11110f] p-8 text-center transition-colors hover:border-[#c9a35c]/30"
             >
               {partner.logoUrl ? (
-                <div className="relative mb-4 h-20 w-20 overflow-hidden rounded-full">
-                  <Image
+                <div className="mb-4 h-20 w-20 overflow-hidden rounded-full">
+                  <img
                     src={partner.logoUrl}
                     alt={isAr ? partner.nameAr : partner.nameEn}
-                    fill
-                    className="object-contain"
-                    unoptimized={partner.logoUrl.startsWith("data:")}
+                    className="h-full w-full rounded-full object-contain"
                   />
                 </div>
               ) : (

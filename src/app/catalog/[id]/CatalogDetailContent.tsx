@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
 import Link from "next/link"
 import { ArrowLeft, X, ChevronLeft, ChevronRight } from "lucide-react"
 import { useLang } from "@/lib/lang-context"
@@ -51,12 +50,10 @@ export default function CatalogDetailContent({ item }: CatalogDetailContentProps
                 index === 0 ? "sm:col-span-2 sm:row-span-2" : ""
               }`}
             >
-              <Image
+              <img
                 src={img.imageUrl}
                 alt={img.altText || title || `Image ${index + 1}`}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                unoptimized={img.imageUrl?.startsWith("data:")}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/30" />
             </button>
@@ -104,13 +101,10 @@ export default function CatalogDetailContent({ item }: CatalogDetailContentProps
             className="relative h-[80vh] w-[90vw]"
             onClick={(e) => e.stopPropagation()}
           >
-            <Image
+            <img
               src={images[lightboxIndex].imageUrl}
               alt={images[lightboxIndex].altText || title || `Image ${lightboxIndex + 1}`}
-              fill
-              className="object-contain"
-              priority
-              unoptimized={images[lightboxIndex].imageUrl?.startsWith("data:")}
+              className="h-full w-full object-contain"
             />
           </div>
 
