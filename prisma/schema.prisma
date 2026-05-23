@@ -73,16 +73,16 @@ model TrustItem {
 }
 
 model Capability {
-  id             String   @id @default(cuid())
-  titleEn        String
-  titleAr        String
-  descriptionEn  String
-  descriptionAr  String
-  icon           String?
-  sortOrder      Int      @default(0)
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id            String   @id @default(cuid())
+  titleEn       String
+  titleAr       String
+  descriptionEn String
+  descriptionAr String
+  icon          String?
+  sortOrder     Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Sector {
@@ -96,36 +96,37 @@ model Sector {
 }
 
 model Project {
-  id          String   @id @default(cuid())
-  titleEn     String
-  titleAr     String
-  categoryEn  String
-  categoryAr  String
-  locationEn  String
-  locationAr  String
-  year        String
-  size        String
-  summaryEn   String
-  summaryAr   String
-  imageUrl    String?
-  isFeatured  Boolean  @default(false)
-  sortOrder   Int      @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  images      ProjectImage[] @relation("ProjectImages")
+  id         String         @id @default(cuid())
+  titleEn    String
+  titleAr    String
+  categoryEn String
+  categoryAr String
+  locationEn String
+  locationAr String
+  year       String
+  size       String
+  summaryEn  String
+  summaryAr  String
+  imageUrl   String?
+  isFeatured Boolean        @default(false)
+  sortOrder  Int            @default(0)
+  isActive   Boolean        @default(true)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  images     ProjectImage[] @relation("ProjectImages")
 }
 
 model ProjectImage {
-  id          String   @id @default(cuid())
-  project     Project  @relation("ProjectImages", fields: [projectId], references: [id])
-  projectId   String
-  imageUrl    String
-  altText     String?
-  sortOrder   Int      @default(0)
-  isCover     Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  project   Project  @relation("ProjectImages", fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  imageUrl  String
+  altText   String?
+  sortOrder Int      @default(0)
+  isCover   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([projectId])
   @@index([isCover])
 }
@@ -146,30 +147,31 @@ model Material {
 }
 
 model CatalogItem {
-  id          String   @id @default(cuid())
+  id          String         @id @default(cuid())
   titleEn     String?
   titleAr     String?
   categoryEn  String?
   categoryAr  String?
   imageUrl    String?
-  showOverlay Boolean  @default(true)
-  sortOrder   Int      @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  showOverlay Boolean        @default(true)
+  sortOrder   Int            @default(0)
+  isActive    Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
   images      CatalogImage[] @relation("CatalogItemImages")
 }
 
 model CatalogImage {
-  id          String   @id @default(cuid())
-  catalogItem CatalogItem @relation("CatalogItemImages", fields: [catalogItemId], references: [id], onDelete: Cascade)
+  id            String      @id @default(cuid())
+  catalogItem   CatalogItem @relation("CatalogItemImages", fields: [catalogItemId], references: [id], onDelete: Cascade)
   catalogItemId String
-  imageUrl    String
-  altText     String?
-  sortOrder   Int      @default(0)
-  isCover     Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  imageUrl      String
+  altText       String?
+  sortOrder     Int         @default(0)
+  isCover       Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
   @@index([catalogItemId])
   @@index([isCover])
 }
@@ -187,20 +189,20 @@ model Partner {
 }
 
 model ContactInfo {
-  id        String   @id @default(cuid())
-  phone     String   @default("+20 000 000 0000")
-  email     String   @default("info@elgedadaworks.com")
-  locationEn String  @default("Cairo, Egypt")
-  locationAr String  @default("القاهرة، مصر")
+  id         String   @id @default(cuid())
+  phone      String   @default("+20 000 000 0000")
+  email      String   @default("info@elgedadaworks.com")
+  locationEn String   @default("Cairo, Egypt")
+  locationAr String   @default("القاهرة، مصر")
   addressEn  String?
   addressAr  String?
-  mapEmbed  String?
-  facebook  String?
-  instagram String?
-  linkedin  String?
-  twitter   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  mapEmbed   String?
+  facebook   String?
+  instagram  String?
+  linkedin   String?
+  twitter    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model MediaAsset {
@@ -216,14 +218,14 @@ model MediaAsset {
 }
 
 model SeoSettings {
-  id              String   @id @default(cuid())
-  titleEn         String   @default("EL GEDADA | Engineering Works & Contracting")
-  titleAr         String   @default("الجـدادة | أعمال هندسية ومقاولات")
-  descriptionEn   String   @default("EL GEDADA is a premium engineering workshop and contracting company. View our portfolio of completed projects, fabrication capabilities, and professional execution standards.")
-  descriptionAr   String   @default("الجـدادة ورشة هندسية وشركة مقاولات محترفة. تصفح بورتفوليو المشاريع المنفذة، قدرات التصنيع، ومعايير التنفيذ الاحترافية.")
-  ogImageUrl      String?
-  keywordsEn      String?
-  keywordsAr      String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id            String   @id @default(cuid())
+  titleEn       String   @default("EL GEDADA | Engineering Works & Contracting")
+  titleAr       String   @default("الجـدادة | أعمال هندسية ومقاولات")
+  descriptionEn String   @default("EL GEDADA is a premium engineering workshop and contracting company. View our portfolio of completed projects, fabrication capabilities, and professional execution standards.")
+  descriptionAr String   @default("الجـدادة ورشة هندسية وشركة مقاولات محترفة. تصفح بورتفوليو المشاريع المنفذة، قدرات التصنيع، ومعايير التنفيذ الاحترافية.")
+  ogImageUrl    String?
+  keywordsEn    String?
+  keywordsAr    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
