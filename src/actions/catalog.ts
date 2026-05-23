@@ -4,7 +4,6 @@ import { cookies } from "next/headers"
 import { prisma } from "@/lib/prisma"
 import { verifyToken } from "@/lib/auth"
 import { success, error } from "@/lib/utils"
-import { uploadMedia } from "./media"
 
 async function requireAuth() {
   const cookieStore = await cookies()
@@ -59,48 +58,36 @@ export async function createCatalogItem(data: {
     base64: string
     altText?: string
     sortOrder?: number
+    isCover?: boolean
   }>
 }) {
   try {
     await requireAuth()
-    
-    // Create catalog item without images first
+
     const item = await prisma.catalogItem.create({
       data: {
         titleEn: data.titleEn,
         titleAr: data.titleAr,
         categoryEn: data.categoryEn,
         categoryAr: data.categoryAr,
-        // We don't have a single imageUrl or showOverlay anymore, so we set defaults
-        showOverlay: true, // default
+        showOverlay: true,
       },
     })
-    
-    // If images provided, upload them and create catalog image records
+
     if (data.images && data.images.length > 0) {
       for (const [index, imageData] of data.images.entries()) {
-        const base64 = imageData.base64
-        const altText = imageData.altText ?? `Image ${index + 1}`
-        const sortOrder = imageData.sortOrder ?? index
-        
-        // Upload the image
-        const uploadResult = await uploadMedia(base64, `catalog-item-${item.id}-${index}`)
-        if (uploadResult.success) {
-          const asset = uploadResult.data as { url: string }
-          // Create catalog image record
-          await prisma.catalogImage.create({
-            data: {
-              catalogItemId: item.id,
-              imageUrl: asset.url,
-              altText: altText,
-              sortOrder: sortOrder,
-              isCover: index === 0, // First image is cover by default
-            },
-          })
-        }
+        await prisma.catalogImage.create({
+          data: {
+            catalogItemId: item.id,
+            imageUrl: imageData.base64,
+            altText: imageData.altText ?? `Image ${index + 1}`,
+            sortOrder: imageData.sortOrder ?? index,
+            isCover: imageData.isCover ?? (index === 0),
+          },
+        })
       }
     }
-    
+
     return success(item)
   } catch (err) {
     if (err instanceof Error && err.message === "Unauthorized") return error("Unauthorized")
@@ -135,7 +122,6 @@ export async function updateCatalogItem(id: string, data: {
       },
     })
 
-    // Delete images that were removed
     if (data.deletedImageIds && data.deletedImageIds.length > 0) {
       await prisma.catalogImage.deleteMany({
         where: { id: { in: data.deletedImageIds } },
@@ -145,19 +131,15 @@ export async function updateCatalogItem(id: string, data: {
     if (data.images) {
       for (const imageData of data.images) {
         if (imageData.base64) {
-          const uploadResult = await uploadMedia(imageData.base64, `catalog-item-${updatedItem.id}-new`)
-          if (uploadResult.success) {
-            const asset = uploadResult.data as { url: string }
-            await prisma.catalogImage.create({
-              data: {
-                catalogItemId: updatedItem.id,
-                imageUrl: asset.url,
-                altText: imageData.altText ?? `Image`,
-                sortOrder: imageData.sortOrder ?? 0,
-                isCover: imageData.isCover ?? false,
-              },
-            })
-          }
+          await prisma.catalogImage.create({
+            data: {
+              catalogItemId: updatedItem.id,
+              imageUrl: imageData.base64,
+              altText: imageData.altText ?? `Image`,
+              sortOrder: imageData.sortOrder ?? 0,
+              isCover: imageData.isCover ?? false,
+            },
+          })
         } else if (imageData.id) {
           await prisma.catalogImage.update({
             where: { id: imageData.id },

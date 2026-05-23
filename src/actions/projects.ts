@@ -4,7 +4,6 @@ import { cookies } from "next/headers"
 import { prisma } from "@/lib/prisma"
 import { verifyToken } from "@/lib/auth"
 import { success, error } from "@/lib/utils"
-import { uploadMedia } from "./media"
 
 async function requireAuth() {
   const cookieStore = await cookies()
@@ -65,6 +64,7 @@ export async function createProject(data: {
     base64: string
     altText?: string
     sortOrder?: number
+    isCover?: boolean
   }>
   isFeatured?: boolean
   sortOrder?: number
@@ -72,8 +72,7 @@ export async function createProject(data: {
 }) {
   try {
     await requireAuth()
-    
-    // Create project without images first
+
     const project = await prisma.project.create({
       data: {
         titleEn: data.titleEn,
@@ -91,32 +90,21 @@ export async function createProject(data: {
         isActive: data.isActive ?? true,
       },
     })
-    
-    // If images provided, upload them and create project image records
+
     if (data.images && data.images.length > 0) {
       for (const [index, imageData] of data.images.entries()) {
-        const base64 = imageData.base64
-        const altText = imageData.altText ?? `Image ${index + 1}`
-        const sortOrder = imageData.sortOrder ?? index
-        
-        // Upload the image
-        const uploadResult = await uploadMedia(base64, `project-${project.id}-${index}`)
-        if (uploadResult.success) {
-          const asset = uploadResult.data as { url: string }
-          // Create project image record
-          await prisma.projectImage.create({
-            data: {
-              projectId: project.id,
-              imageUrl: asset.url,
-              altText: altText,
-              sortOrder: sortOrder,
-              isCover: index === 0, // First image is cover by default
-            },
-          })
-        }
+        await prisma.projectImage.create({
+          data: {
+            projectId: project.id,
+            imageUrl: imageData.base64,
+            altText: imageData.altText ?? `Image ${index + 1}`,
+            sortOrder: imageData.sortOrder ?? index,
+            isCover: imageData.isCover ?? (index === 0),
+          },
+        })
       }
     }
-    
+
     return success(project)
   } catch (err) {
     if (err instanceof Error && err.message === "Unauthorized") return error("Unauthorized")
@@ -178,19 +166,15 @@ export async function updateProject(id: string, data: {
     if (data.images) {
       for (const imageData of data.images) {
         if (imageData.base64) {
-          const uploadResult = await uploadMedia(imageData.base64, `project-${updatedProject.id}-new`)
-          if (uploadResult.success) {
-            const asset = uploadResult.data as { url: string }
-            await prisma.projectImage.create({
-              data: {
-                projectId: updatedProject.id,
-                imageUrl: asset.url,
-                altText: imageData.altText ?? `Image`,
-                sortOrder: imageData.sortOrder ?? 0,
-                isCover: imageData.isCover ?? false,
-              },
-            })
-          }
+          await prisma.projectImage.create({
+            data: {
+              projectId: updatedProject.id,
+              imageUrl: imageData.base64,
+              altText: imageData.altText ?? `Image`,
+              sortOrder: imageData.sortOrder ?? 0,
+              isCover: imageData.isCover ?? false,
+            },
+          })
         } else if (imageData.id) {
           await prisma.projectImage.update({
             where: { id: imageData.id },
