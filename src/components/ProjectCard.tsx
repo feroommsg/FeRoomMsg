@@ -13,7 +13,8 @@ interface Project {
   size: string
   summaryEn: string
   summaryAr: string
-  images: {
+  imageUrl?: string | null
+  images?: {
     imageUrl: string
     altText?: string
     sortOrder: number
@@ -36,8 +37,7 @@ export default function ProjectCard({ project, lang, index }: ProjectCardProps) 
   const location = isAr ? project.locationAr : project.locationEn
   const summary = isAr ? project.summaryAr : project.summaryEn
 
-  const coverImage = project.images?.find(img => img.isCover) || project.images?.[0]
-  const imageUrl = coverImage?.imageUrl || ""
+  const imageUrl = project.imageUrl || (project.images?.[0]?.imageUrl) || ""
 
   return (
     <div

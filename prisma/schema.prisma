@@ -107,6 +107,7 @@ model Project {
   size        String
   summaryEn   String
   summaryAr   String
+  imageUrl    String?
   isFeatured  Boolean  @default(false)
   sortOrder   Int      @default(0)
   isActive    Boolean  @default(true)
@@ -150,12 +151,13 @@ model CatalogItem {
   titleAr     String?
   categoryEn  String?
   categoryAr  String?
+  imageUrl    String?
   showOverlay Boolean  @default(true)
   sortOrder   Int      @default(0)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  images      CatalogImage[] @relation("CatalogItemImages", onDelete: Cascade)
+  images      CatalogImage[] @relation("CatalogItemImages")
 }
 
 model CatalogImage {

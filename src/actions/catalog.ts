@@ -54,12 +54,7 @@ export async function createCatalogItem(data: {
   titleAr?: string
   categoryEn?: string
   categoryAr?: string
-  images?: Array<{
-    base64: string
-    altText?: string
-    sortOrder?: number
-    isCover?: boolean
-  }>
+  imageUrl?: string
 }) {
   try {
     await requireAuth()
@@ -70,27 +65,15 @@ export async function createCatalogItem(data: {
         titleAr: data.titleAr,
         categoryEn: data.categoryEn,
         categoryAr: data.categoryAr,
+        imageUrl: data.imageUrl,
         showOverlay: true,
       },
     })
 
-    if (data.images && data.images.length > 0) {
-      for (const [index, imageData] of data.images.entries()) {
-        await prisma.catalogImage.create({
-          data: {
-            catalogItemId: item.id,
-            imageUrl: imageData.base64,
-            altText: imageData.altText ?? `Image ${index + 1}`,
-            sortOrder: imageData.sortOrder ?? index,
-            isCover: imageData.isCover ?? (index === 0),
-          },
-        })
-      }
-    }
-
     return success(item)
   } catch (err) {
     if (err instanceof Error && err.message === "Unauthorized") return error("Unauthorized")
+    console.error("createCatalogItem error:", err)
     return error(err instanceof Error ? err.message : "Failed to create catalog item")
   }
 }
@@ -100,14 +83,7 @@ export async function updateCatalogItem(id: string, data: {
   titleAr?: string
   categoryEn?: string
   categoryAr?: string
-  images?: Array<{
-    base64?: string
-    altText?: string
-    sortOrder?: number
-    isCover?: boolean
-    id?: string
-  }>
-  deletedImageIds?: string[]
+  imageUrl?: string
 }) {
   try {
     await requireAuth()
@@ -119,43 +95,14 @@ export async function updateCatalogItem(id: string, data: {
         titleAr: data.titleAr,
         categoryEn: data.categoryEn,
         categoryAr: data.categoryAr,
+        imageUrl: data.imageUrl,
       },
     })
-
-    if (data.deletedImageIds && data.deletedImageIds.length > 0) {
-      await prisma.catalogImage.deleteMany({
-        where: { id: { in: data.deletedImageIds } },
-      })
-    }
-
-    if (data.images) {
-      for (const imageData of data.images) {
-        if (imageData.base64) {
-          await prisma.catalogImage.create({
-            data: {
-              catalogItemId: updatedItem.id,
-              imageUrl: imageData.base64,
-              altText: imageData.altText ?? `Image`,
-              sortOrder: imageData.sortOrder ?? 0,
-              isCover: imageData.isCover ?? false,
-            },
-          })
-        } else if (imageData.id) {
-          await prisma.catalogImage.update({
-            where: { id: imageData.id },
-            data: {
-              altText: imageData.altText,
-              sortOrder: imageData.sortOrder,
-              isCover: imageData.isCover,
-            },
-          })
-        }
-      }
-    }
 
     return success(updatedItem)
   } catch (err) {
     if (err instanceof Error && err.message === "Unauthorized") return error("Unauthorized")
+    console.error("updateCatalogItem error:", err)
     return error(err instanceof Error ? err.message : "Failed to update catalog item")
   }
 }

@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { getAllProjects, createProject, updateProject, deleteProject, toggleFeatured } from "@/actions"
-import MultiImageUploader, { type ImageEntry } from "@/components/MultiImageUploader"
+import { uploadMedia } from "@/actions/media"
+import ImageUploader from "@/components/ImageUploader"
 import AdminTable from "@/components/AdminTable"
 import { Loader2, X, Star } from "lucide-react"
 
@@ -18,7 +19,7 @@ interface Project {
   size: string
   summaryEn: string
   summaryAr: string
-  images: ImageEntry[]
+  imageUrl: string | null
   isFeatured: boolean
   sortOrder: number
 }
@@ -26,7 +27,7 @@ interface Project {
 const emptyForm = {
   titleEn: "", titleAr: "", categoryEn: "", categoryAr: "",
   locationEn: "", locationAr: "", year: "", size: "",
-  summaryEn: "", summaryAr: "", images: [] as ImageEntry[],
+  summaryEn: "", summaryAr: "", imageUrl: "",
   isFeatured: false, sortOrder: 0,
 }
 
@@ -35,7 +36,8 @@ export default function AdminProjectsPage() {
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState<{ item?: Project } & typeof emptyForm | null>(null)
   const [saving, setSaving] = useState(false)
-  const [deletedImageIds, setDeletedImageIds] = useState<string[]>([])
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   const load = async () => {
     const res = await getAllProjects()
@@ -58,14 +60,7 @@ export default function AdminProjectsPage() {
   const handleSave = async () => {
     if (!modal) return
     setSaving(true)
-
-    const imagesPayload = modal.images.map((img) => ({
-      id: img.id,
-      base64: img.base64,
-      altText: img.altText,
-      sortOrder: img.sortOrder,
-      isCover: img.isCover,
-    }))
+    setSaveError(null)
 
     const data = {
       titleEn: modal.titleEn, titleAr: modal.titleAr,
@@ -73,61 +68,58 @@ export default function AdminProjectsPage() {
       locationEn: modal.locationEn, locationAr: modal.locationAr,
       year: modal.year, size: modal.size,
       summaryEn: modal.summaryEn, summaryAr: modal.summaryAr,
-      images: imagesPayload,
-      deletedImageIds,
+      imageUrl: modal.imageUrl || undefined,
       isFeatured: modal.isFeatured, sortOrder: modal.sortOrder,
     }
 
+    let res
     if (modal.item) {
-      await updateProject(modal.item.id, data as any)
+      res = await updateProject(modal.item.id, data as any)
     } else {
-      await createProject(data as any)
+      res = await createProject(data as any)
+    }
+
+    if (!res.success) {
+      setSaveError(res.error || "Save failed")
+      setSaving(false)
+      return
     }
 
     setSaving(false)
-    setDeletedImageIds([])
     setModal(null)
     load()
   }
 
+  const handleImageUpload = async (base64: string) => {
+    setUploadError(null)
+    if (!base64) {
+      setModal((m) => m ? { ...m, imageUrl: "" } : null)
+      return
+    }
+    setModal((m) => m ? { ...m, imageUrl: base64 } : null)
+    const res = await uploadMedia(base64, "project")
+    if (res.success) {
+      const asset = res.data as { url: string }
+      setModal((m) => m ? { ...m, imageUrl: asset.url } : null)
+    } else {
+      setUploadError(res.error || "Upload failed")
+    }
+  }
+
   const openCreate = () => {
-    setDeletedImageIds([])
     setModal({ ...emptyForm, sortOrder: projects.length })
   }
 
   const openEdit = (item: Project) => {
-    setDeletedImageIds([])
-    const p = item as Project
     setModal({
-      item: p,
-      titleEn: p.titleEn, titleAr: p.titleAr,
-      categoryEn: p.categoryEn, categoryAr: p.categoryAr,
-      locationEn: p.locationEn, locationAr: p.locationAr,
-      year: p.year, size: p.size,
-      summaryEn: p.summaryEn, summaryAr: p.summaryAr,
-      images: (p.images || []).map((img) => ({
-        id: img.id,
-        imageUrl: img.imageUrl,
-        altText: img.altText,
-        sortOrder: img.sortOrder,
-        isCover: img.isCover,
-      })),
-      isFeatured: p.isFeatured, sortOrder: p.sortOrder,
-    })
-  }
-
-  const handleImagesChange = (images: ImageEntry[]) => {
-    setModal((prev) => {
-      if (!prev) return null
-      if (prev.images.length > images.length) {
-        const removedIds = prev.images
-          .filter((old) => old.id && !images.some((img) => img.id === old.id))
-          .map((img) => img.id!)
-        if (removedIds.length > 0) {
-          setDeletedImageIds((prevIds) => [...prevIds, ...removedIds])
-        }
-      }
-      return { ...prev, images }
+      item,
+      titleEn: item.titleEn, titleAr: item.titleAr,
+      categoryEn: item.categoryEn, categoryAr: item.categoryAr,
+      locationEn: item.locationEn, locationAr: item.locationAr,
+      year: item.year, size: item.size,
+      summaryEn: item.summaryEn, summaryAr: item.summaryAr,
+      imageUrl: item.imageUrl || "",
+      isFeatured: item.isFeatured, sortOrder: item.sortOrder,
     })
   }
 
@@ -138,14 +130,13 @@ export default function AdminProjectsPage() {
       <AdminTable
         columns={[
           {
-            key: "cover",
-            label: "Cover",
+            key: "imageUrl",
+            label: "Image",
             render: (item) => {
               const p = item as Project
-              const cover = p.images?.find((img) => img.isCover) || p.images?.[0]
-              return cover ? (
+              return p.imageUrl ? (
                 <div className="h-10 w-10 overflow-hidden rounded">
-                  <img src={cover.imageUrl} alt="" className="h-full w-full object-cover" />
+                  <img src={p.imageUrl} alt="" className="h-full w-full object-cover" />
                 </div>
               ) : (
                 <span className="text-xs text-[#e8e2d6]/30">—</span>
@@ -155,14 +146,6 @@ export default function AdminProjectsPage() {
           { key: "titleEn", label: "Title (EN)" },
           { key: "categoryEn", label: "Category" },
           { key: "year", label: "Year" },
-          {
-            key: "imagesCount",
-            label: "Images",
-            render: (item) => {
-              const count = (item as Project).images?.length || 0
-              return <span className="text-[#e8e2d6]/60">{count}</span>
-            },
-          },
           { key: "sortOrder", label: "Order" },
           {
             key: "isFeatured",
@@ -194,7 +177,7 @@ export default function AdminProjectsPage() {
               <h3 className="text-base font-semibold text-[#e8e2d6]">
                 {modal.item ? "Edit Project" : "New Project"}
               </h3>
-              <button onClick={() => { setModal(null); setDeletedImageIds([]) }} className="text-[#e8e2d6]/40 hover:text-[#e8e2d6]">
+              <button onClick={() => setModal(null)} className="text-[#e8e2d6]/40 hover:text-[#e8e2d6]">
                 <X size={18} />
               </button>
             </div>
@@ -223,18 +206,22 @@ export default function AdminProjectsPage() {
               </div>
               <InputField label="Summary (EN)" value={modal.summaryEn} onChange={(v) => setModal({ ...modal, summaryEn: v })} />
               <InputField label="Summary (AR)" value={modal.summaryAr} onChange={(v) => setModal({ ...modal, summaryAr: v })} />
-              <MultiImageUploader
-                label="Project Images"
-                images={modal.images}
-                onChange={handleImagesChange}
-              />
+
+              {uploadError && (
+                <p className="text-xs text-red-400">{uploadError}</p>
+              )}
+              <ImageUploader label="Project Image" currentImage={modal.imageUrl} onUpload={handleImageUpload} />
+
+              {saveError && (
+                <p className="text-sm text-red-400">{saveError}</p>
+              )}
 
               <div className="flex items-center gap-3 pt-2">
                 <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 rounded-md bg-[#c9a35c] px-4 py-2 text-sm font-semibold text-[#0d0d0b] hover:bg-[#b8922f] disabled:opacity-60">
                   {saving && <Loader2 className="animate-spin" size={14} />}
                   {saving ? "Saving..." : "Save"}
                 </button>
-                <button onClick={() => { setModal(null); setDeletedImageIds([]) }} className="rounded-md border border-[#e8e2d6]/10 px-4 py-2 text-sm text-[#e8e2d6]/60 hover:text-[#e8e2d6]">
+                <button onClick={() => setModal(null)} className="rounded-md border border-[#e8e2d6]/10 px-4 py-2 text-sm text-[#e8e2d6]/60 hover:text-[#e8e2d6]">
                   Cancel
                 </button>
               </div>

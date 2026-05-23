@@ -224,7 +224,7 @@ async function imageFileToDataUrl(file: File): Promise<string> {
       img.onerror = () => reject(new Error("Cannot read this image. Try JPG, PNG, or WebP."))
       img.src = objectUrl
     })
-    const maxWidth = 1800
+    const maxWidth = 1200
     const scale = Math.min(1, maxWidth / image.naturalWidth)
     const width = Math.max(1, Math.round(image.naturalWidth * scale))
     const height = Math.max(1, Math.round(image.naturalHeight * scale))
@@ -234,7 +234,7 @@ async function imageFileToDataUrl(file: File): Promise<string> {
     const ctx = canvas.getContext("2d")
     if (!ctx) throw new Error("Image processing not supported in this browser.")
     ctx.drawImage(image, 0, 0, width, height)
-    return canvas.toDataURL("image/jpeg", 0.86)
+    return canvas.toDataURL("image/jpeg", 0.82)
   } finally {
     URL.revokeObjectURL(objectUrl)
   }

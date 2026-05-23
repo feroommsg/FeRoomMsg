@@ -60,12 +60,7 @@ export async function createProject(data: {
   size: string
   summaryEn: string
   summaryAr: string
-  images?: Array<{
-    base64: string
-    altText?: string
-    sortOrder?: number
-    isCover?: boolean
-  }>
+  imageUrl?: string
   isFeatured?: boolean
   sortOrder?: number
   isActive?: boolean
@@ -85,29 +80,17 @@ export async function createProject(data: {
         size: data.size,
         summaryEn: data.summaryEn,
         summaryAr: data.summaryAr,
+        imageUrl: data.imageUrl,
         isFeatured: data.isFeatured ?? false,
         sortOrder: data.sortOrder ?? 0,
         isActive: data.isActive ?? true,
       },
     })
 
-    if (data.images && data.images.length > 0) {
-      for (const [index, imageData] of data.images.entries()) {
-        await prisma.projectImage.create({
-          data: {
-            projectId: project.id,
-            imageUrl: imageData.base64,
-            altText: imageData.altText ?? `Image ${index + 1}`,
-            sortOrder: imageData.sortOrder ?? index,
-            isCover: imageData.isCover ?? (index === 0),
-          },
-        })
-      }
-    }
-
     return success(project)
   } catch (err) {
     if (err instanceof Error && err.message === "Unauthorized") return error("Unauthorized")
+    console.error("createProject error:", err)
     return error(err instanceof Error ? err.message : "Failed to create project")
   }
 }
@@ -123,14 +106,7 @@ export async function updateProject(id: string, data: {
   size?: string
   summaryEn?: string
   summaryAr?: string
-  images?: Array<{
-    base64?: string
-    altText?: string
-    sortOrder?: number
-    isCover?: boolean
-    id?: string
-  }>
-  deletedImageIds?: string[]
+  imageUrl?: string
   isFeatured?: boolean
   sortOrder?: number
   isActive?: boolean
@@ -151,46 +127,17 @@ export async function updateProject(id: string, data: {
         size: data.size,
         summaryEn: data.summaryEn,
         summaryAr: data.summaryAr,
+        imageUrl: data.imageUrl,
         isFeatured: data.isFeatured,
         sortOrder: data.sortOrder,
         isActive: data.isActive,
       },
     })
 
-    if (data.deletedImageIds && data.deletedImageIds.length > 0) {
-      await prisma.projectImage.deleteMany({
-        where: { id: { in: data.deletedImageIds } },
-      })
-    }
-
-    if (data.images) {
-      for (const imageData of data.images) {
-        if (imageData.base64) {
-          await prisma.projectImage.create({
-            data: {
-              projectId: updatedProject.id,
-              imageUrl: imageData.base64,
-              altText: imageData.altText ?? `Image`,
-              sortOrder: imageData.sortOrder ?? 0,
-              isCover: imageData.isCover ?? false,
-            },
-          })
-        } else if (imageData.id) {
-          await prisma.projectImage.update({
-            where: { id: imageData.id },
-            data: {
-              altText: imageData.altText,
-              sortOrder: imageData.sortOrder,
-              isCover: imageData.isCover,
-            },
-          })
-        }
-      }
-    }
-
     return success(updatedProject)
   } catch (err) {
     if (err instanceof Error && err.message === "Unauthorized") return error("Unauthorized")
+    console.error("updateProject error:", err)
     return error(err instanceof Error ? err.message : "Failed to update project")
   }
 }
