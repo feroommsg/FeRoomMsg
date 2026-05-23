@@ -162,7 +162,7 @@ async function main() {
   }
 
   // Projects
-  const projects = [
+  const projectsData = [
     {
       titleEn: "Corporate Headquarters Fit-Out",
       titleAr: "تشطيب مقر إداري",
@@ -176,10 +176,22 @@ async function main() {
         "Turnkey execution for a premium administrative workspace including partitions, ceilings, flooring, lighting, metal details, and custom joinery.",
       summaryAr:
         "تنفيذ متكامل لمساحة إدارية تشمل القواطيع، الأسقف، الأرضيات، الإضاءة، التفاصيل المعدنية، والأعمال الخشبية المخصصة.",
-      imageUrl:
-        "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1800&auto=format&fit=crop",
       isFeatured: true,
       sortOrder: 0,
+      images: [
+        {
+          url: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1800&auto=format&fit=crop",
+          alt: "Corporate HQ Fit-Out",
+          sortOrder: 0,
+          isCover: true,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1504204367264-00d8f11ddc7a?q=80&w=1800&auto=format&fit=crop",
+          alt: "Corporate HQ Detail",
+          sortOrder: 1,
+          isCover: false,
+        },
+      ],
     },
     {
       titleEn: "Retail Display Structure",
@@ -194,10 +206,22 @@ async function main() {
         "Custom engineered display systems with steel, wood, acrylic, and premium finishing for high-traffic retail use.",
       summaryAr:
         "تصنيع وحدات عرض مخصصة باستخدام المعدن، الخشب، الأكريليك، وتشطيبات قوية مناسبة للاستخدام التجاري.",
-      imageUrl:
-        "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?q=80&w=1800&auto=format&fit=crop",
       isFeatured: true,
       sortOrder: 1,
+      images: [
+        {
+          url: "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?q=80&w=1800&auto=format&fit=crop",
+          alt: "Retail Display Structure",
+          sortOrder: 0,
+          isCover: true,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1518821929447-38f6e11e3b04?q=80&w=1800&auto=format&fit=crop",
+          alt: "Retail Display Detail",
+          sortOrder: 1,
+          isCover: false,
+        },
+      ],
     },
     {
       titleEn: "Residential Finishing Works",
@@ -212,16 +236,53 @@ async function main() {
         "Complete finishing package from site preparation to final delivery with coordinated materials, lighting, doors, floors, and wall treatments.",
       summaryAr:
         "باقة تشطيب كاملة من تجهيز الموقع حتى التسليم النهائي مع تنسيق الخامات، الإضاءة، الأبواب، الأرضيات، ومعالجات الحوائط.",
-      imageUrl:
-        "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=1800&auto=format&fit=crop",
       isFeatured: true,
       sortOrder: 2,
+      images: [
+        {
+          url: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=1800&auto=format&fit=crop",
+          alt: "Residential Finishing",
+          sortOrder: 0,
+          isCover: true,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1571019613404-1b7e3398d43b?q=80&w=1800&auto=format&fit=crop",
+          alt: "Residential Finishing Detail",
+          sortOrder: 1,
+          isCover: false,
+        },
+      ],
     },
   ]
 
-  if ((await prisma.project.count()) === 0) {
-    for (const project of projects) {
-      await prisma.project.create({ data: project })
+  for (const projectData of projectsData) {
+    const project = await prisma.project.create({
+      data: {
+        titleEn: projectData.titleEn,
+        titleAr: projectData.titleAr,
+        categoryEn: projectData.categoryEn,
+        categoryAr: projectData.categoryAr,
+        locationEn: projectData.locationEn,
+        locationAr: projectData.locationAr,
+        year: projectData.year,
+        size: projectData.size,
+        summaryEn: projectData.summaryEn,
+        summaryAr: projectData.summaryAr,
+        isFeatured: projectData.isFeatured,
+        sortOrder: projectData.sortOrder,
+      },
+    })
+
+    for (const imageData of projectData.images) {
+      await prisma.projectImage.create({
+        data: {
+          projectId: project.id,
+          imageUrl: imageData.url,
+          altText: imageData.alt,
+          sortOrder: imageData.sortOrder,
+          isCover: imageData.isCover,
+        },
+      })
     }
   }
 
@@ -288,72 +349,164 @@ async function main() {
   }
 
   // Catalog items
-  const catalogItems = [
+  const catalogItemsData = [
     {
       titleEn: "Metal Works",
       titleAr: "الأعمال المعدنية",
       categoryEn: "Workshop Production",
       categoryAr: "تصنيع داخل الورشة",
-      imageUrl:
-        "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?q=80&w=1400&auto=format&fit=crop",
       showOverlay: true,
       sortOrder: 0,
+      images: [
+        {
+          url: "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?q=80&w=1400&auto=format&fit=crop",
+          alt: "Metal Works",
+          sortOrder: 0,
+          isCover: true,
+        },
+        // Add a second image for variety
+        {
+          url: "https://images.unsplash.com/photo-1526401074019-6b2b9cf8fd75?q=80&w=1400&auto=format&fit=crop",
+          alt: "Metal Works Detail",
+          sortOrder: 1,
+          isCover: false,
+        },
+      ],
     },
     {
       titleEn: "Wood & Joinery",
       titleAr: "النجارة والأعمال الخشبية",
       categoryEn: "Interior Production",
       categoryAr: "تصنيع داخلي",
-      imageUrl:
-        "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=1400&auto=format&fit=crop",
       showOverlay: true,
       sortOrder: 1,
+      images: [
+        {
+          url: "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=1400&auto=format&fit=crop",
+          alt: "Wood & Joinery",
+          sortOrder: 0,
+          isCover: true,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1580912927614-5f692d5ecd1b?q=80&w=1400&auto=format&fit=crop",
+          alt: "Wood Joinery Detail",
+          sortOrder: 1,
+          isCover: false,
+        },
+      ],
     },
     {
       titleEn: "Finishing Systems",
       titleAr: "أنظمة التشطيب",
       categoryEn: "Contracting Works",
       categoryAr: "أعمال مقاولات",
-      imageUrl:
-        "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=1400&auto=format&fit=crop",
       showOverlay: true,
       sortOrder: 2,
+      images: [
+        {
+          url: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=1400&auto=format&fit=crop",
+          alt: "Finishing Systems",
+          sortOrder: 0,
+          isCover: true,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1581091871809-1f2bd03f2c1b?q=80&w=1400&auto=format&fit=crop",
+          alt: "Finishing Systems Detail",
+          sortOrder: 1,
+          isCover: false,
+        },
+      ],
     },
     {
       titleEn: "Retail & Display Units",
       titleAr: "وحدات العرض التجاري",
       categoryEn: "Commercial Fabrication",
       categoryAr: "تصنيع تجاري",
-      imageUrl:
-        "https://images.unsplash.com/photo-1518005020951-eccb494ad742?q=80&w=1400&auto=format&fit=crop",
       showOverlay: true,
       sortOrder: 3,
+      images: [
+        {
+          url: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?q=80&w=1400&auto=format&fit=crop",
+          alt: "Retail & Display Units",
+          sortOrder: 0,
+          isCover: true,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1580913235594-4a7b10d0d5b5?q=80&w=1400&auto=format&fit=crop",
+          alt: "Retail Display Detail",
+          sortOrder: 1,
+          isCover: false,
+        },
+      ],
     },
     {
       titleEn: "Booths & Exhibition Work",
       titleAr: "بوثات ومعارض",
       categoryEn: "Events & Activations",
       categoryAr: "فعاليات وتنشيطات",
-      imageUrl:
-        "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=1400&auto=format&fit=crop",
       showOverlay: true,
       sortOrder: 4,
+      images: [
+        {
+          url: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=1400&auto=format&fit=crop",
+          alt: "Booths & Exhibition Work",
+          sortOrder: 0,
+          isCover: true,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1522199710521-1262f2f8f4c6?q=80&w=1400&auto=format&fit=crop",
+          alt: "Booth Exhibition Detail",
+          sortOrder: 1,
+          isCover: false,
+        },
+      ],
     },
     {
       titleEn: "Renovation & Maintenance",
       titleAr: "تجديد وصيانة",
       categoryEn: "Site Services",
       categoryAr: "خدمات موقع",
-      imageUrl:
-        "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=1400&auto=format&fit=crop",
       showOverlay: true,
       sortOrder: 5,
+      images: [
+        {
+          url: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=1400&auto=format&fit=crop",
+          alt: "Renovation & Maintenance",
+          sortOrder: 0,
+          isCover: true,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1526401074019-6b2b9cf8fd75?q=80&w=1400&auto=format&fit=crop",
+          alt: "Renovation Maintenance Detail",
+          sortOrder: 1,
+          isCover: false,
+        },
+      ],
     },
   ]
 
-  if ((await prisma.catalogItem.count()) === 0) {
-    for (const item of catalogItems) {
-      await prisma.catalogItem.create({ data: item })
+  for (const itemData of catalogItemsData) {
+    const catalogItem = await prisma.catalogItem.create({
+      data: {
+        titleEn: itemData.titleEn,
+        titleAr: itemData.titleAr,
+        categoryEn: itemData.categoryEn,
+        categoryAr: itemData.categoryAr,
+        showOverlay: itemData.showOverlay,
+        sortOrder: itemData.sortOrder,
+      },
+    })
+
+    for (const imageData of itemData.images) {
+      await prisma.catalogImage.create({
+        data: {
+          catalogItemId: catalogItem.id,
+          imageUrl: imageData.url,
+          altText: imageData.alt,
+          sortOrder: imageData.sortOrder,
+          isCover: imageData.isCover,
+        },
+      })
     }
   }
 

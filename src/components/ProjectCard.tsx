@@ -14,7 +14,12 @@ interface Project {
   size: string
   summaryEn: string
   summaryAr: string
-  imageUrl: string
+  images: {
+    imageUrl: string
+    altText?: string
+    sortOrder: number
+    isCover: boolean
+  }[]
 }
 
 interface ProjectCardProps {
@@ -32,20 +37,29 @@ export default function ProjectCard({ project, lang, index }: ProjectCardProps) 
   const location = isAr ? project.locationAr : project.locationEn
   const summary = isAr ? project.summaryAr : project.summaryEn
 
+  const coverImage = project.images?.find(img => img.isCover) || project.images?.[0]
+  const imageUrl = coverImage?.imageUrl || ""
+
   return (
     <div
-      className={`flex flex-col gap-6 md:flex-row ${isReversed ? "md:flex-row-reverse" : ""}`}
+      className={`flex flex-col gap-6 md:flex-row ${isReversed ? "md-flex-row-reverse" : ""}`}
       dir={isAr ? "rtl" : "ltr"}
     >
       <div className="group relative aspect-[4/3] w-full overflow-hidden rounded-lg md:w-1/2">
-        <Image
-          src={project.imageUrl}
-          alt={title}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt={title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-[#11110f]/50">
+            <span className="text-[#e8e2d6]/50">No Image Available</span>
+          </div>
+        )}
         <div className="absolute inset-0 bg-black/20" />
-        <span className="absolute top-4 right-4 rounded-full bg-[#c9a35c] px-3 py-1 text-xs font-semibold text-[#0d0d0b]">
+        <span className="absolute right-4 top-4 rounded-full bg-[#c9a35c] px-3 py-1 text-xs font-semibold text-[#0d0d0b]">
           {category}
         </span>
       </div>

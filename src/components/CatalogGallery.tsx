@@ -1,8 +1,10 @@
 "use client"
 
 import Image from "next/image"
+import Link from "next/link"
 
 interface CatalogItem {
+  id: string
   titleEn: string
   titleAr: string
   categoryEn: string
@@ -31,16 +33,23 @@ export default function CatalogGallery({ items, lang }: CatalogGalleryProps) {
         else if (i % 11 === 0) spans.push("md:row-span-2")
 
         return (
-          <div
-            key={i}
+          <Link
+            key={item.id}
+            href={`/catalog/${item.id}`}
             className={`group relative overflow-hidden rounded-lg ${spans.join(" ")}`}
           >
-            <Image
-              src={item.imageUrl}
-              alt={title}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-            />
+            {item.imageUrl ? (
+              <Image
+                src={item.imageUrl}
+                alt={title}
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-[#11110f]/50">
+                <span className="text-sm text-[#e8e2d6]/30">No Image</span>
+              </div>
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-4">
               {item.showOverlay !== false && (
@@ -52,7 +61,7 @@ export default function CatalogGallery({ items, lang }: CatalogGalleryProps) {
                 </>
               )}
             </div>
-          </div>
+          </Link>
         )
       })}
     </div>

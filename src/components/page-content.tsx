@@ -634,14 +634,22 @@ export function CatalogContent({ items }: CatalogContentProps) {
   const { lang } = useLang()
   const isAr = lang === "ar"
 
-  const catalogItems = items.map((item) => ({
-    titleEn: item.titleEn,
-    titleAr: item.titleAr,
-    categoryEn: item.categoryEn,
-    categoryAr: item.categoryAr,
-    imageUrl: item.imageUrl,
-    showOverlay: item.showOverlay,
-  }))
+  // Extract cover image from each catalog item's images array
+  const catalogItemsWithCoverImage = items.map((item) => {
+    // Find the cover image, or use the first image if no cover is set
+    const coverImage = item.images?.find((img: any) => img.isCover) || item.images?.[0]
+    
+    return {
+      id: item.id,
+      titleEn: item.titleEn,
+      titleAr: item.titleAr,
+      categoryEn: item.categoryEn,
+      categoryAr: item.categoryAr,
+      imageUrl: coverImage?.imageUrl || "",
+      showOverlay: item.showOverlay,
+      // We might want to pass the full images array for detail view, but for now just the cover
+    }
+  })
 
   return (
     <PageShell
@@ -654,12 +662,12 @@ export function CatalogContent({ items }: CatalogContentProps) {
       }
       lang={lang}
     >
-      {catalogItems.length === 0 ? (
+      {catalogItemsWithCoverImage.length === 0 ? (
         <p className="py-12 text-center text-[#e8e2d6]/40">
           {isAr ? "لا توجد صور حالياً" : "No images available"}
         </p>
       ) : (
-        <CatalogGallery items={catalogItems} lang={lang} />
+        <CatalogGallery items={catalogItemsWithCoverImage} lang={lang} />
       )}
     </PageShell>
   )
@@ -702,6 +710,7 @@ export function PartnersContent({ partners }: PartnersContentProps) {
                     alt={isAr ? partner.nameAr : partner.nameEn}
                     fill
                     className="object-contain"
+                    unoptimized={partner.logoUrl.startsWith("data:")}
                   />
                 </div>
               ) : (

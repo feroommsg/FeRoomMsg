@@ -25,6 +25,7 @@ export default function AdminPartnersPage() {
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState<{ item?: Partner } & typeof emptyForm | null>(null)
   const [saving, setSaving] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   const load = async () => {
     const res = await getAllPartners()
@@ -58,6 +59,7 @@ export default function AdminPartnersPage() {
   }
 
   const handleLogoUpload = async (base64: string) => {
+    setUploadError(null)
     if (!base64) {
       setModal((m) => m ? { ...m, logoUrl: "" } : null)
       return
@@ -66,6 +68,8 @@ export default function AdminPartnersPage() {
     if (res.success) {
       const asset = res.data as { url: string }
       setModal((m) => m ? { ...m, logoUrl: asset.url } : null)
+    } else {
+      setUploadError(res.error || "Failed to upload logo")
     }
   }
 
@@ -75,6 +79,20 @@ export default function AdminPartnersPage() {
 
       <AdminTable
         columns={[
+          {
+            key: "logoUrl",
+            label: "Logo",
+            render: (item) => {
+              const p = item as Partner
+              return p.logoUrl ? (
+                <div className="h-10 w-10 overflow-hidden rounded-full">
+                  <img src={p.logoUrl} alt="" className="h-full w-full object-contain" />
+                </div>
+              ) : (
+                <span className="text-xs text-[#e8e2d6]/30">—</span>
+              )
+            },
+          },
           { key: "nameEn", label: "Name (EN)" },
           { key: "nameAr", label: "Name (AR)" },
           { key: "type", label: "Type" },
@@ -123,6 +141,9 @@ export default function AdminPartnersPage() {
                   </select>
                 </div>
               </div>
+              {uploadError && (
+                <p className="text-xs text-red-400">{uploadError}</p>
+              )}
               <ImageUploader label="Logo (optional)" currentImage={modal.logoUrl} onUpload={handleLogoUpload} />
 
               <div className="flex items-center gap-3 pt-2">

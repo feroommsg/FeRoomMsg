@@ -107,12 +107,26 @@ model Project {
   size        String
   summaryEn   String
   summaryAr   String
-  imageUrl    String
   isFeatured  Boolean  @default(false)
   sortOrder   Int      @default(0)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  images      ProjectImage[] @relation("ProjectImages")
+}
+
+model ProjectImage {
+  id          String   @id @default(cuid())
+  project     Project  @relation("ProjectImages", fields: [projectId], references: [id])
+  projectId   String
+  imageUrl    String
+  altText     String?
+  sortOrder   Int      @default(0)
+  isCover     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@index([projectId])
+  @@index([isCover])
 }
 
 model Material {
@@ -136,12 +150,26 @@ model CatalogItem {
   titleAr     String?
   categoryEn  String?
   categoryAr  String?
-  imageUrl    String
   showOverlay Boolean  @default(true)
   sortOrder   Int      @default(0)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  images      CatalogImage[] @relation("CatalogItemImages", onDelete: Cascade)
+}
+
+model CatalogImage {
+  id          String   @id @default(cuid())
+  catalogItem CatalogItem @relation("CatalogItemImages", fields: [catalogItemId], references: [id], onDelete: Cascade)
+  catalogItemId String
+  imageUrl    String
+  altText     String?
+  sortOrder   Int      @default(0)
+  isCover     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@index([catalogItemId])
+  @@index([isCover])
 }
 
 model Partner {

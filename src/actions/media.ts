@@ -23,7 +23,6 @@ export async function uploadMedia(base64: string, filename: string) {
     if (!matches) return error("Invalid base64 image data")
 
     const mimeType = matches[1]
-    const extension = matches[2]
     const rawBase64 = matches[3]
 
     if (!validateImageType(mimeType)) {
@@ -35,12 +34,26 @@ export async function uploadMedia(base64: string, filename: string) {
       return error("Image size exceeds 5MB limit")
     }
 
-    const result = await uploadImage(base64)
+    let url: string
+    let publicId: string | null = null
+
+    // Try Cloudinary first, fall back to base64 if not configured
+    if (process.env.CLOUDINARY_CLOUD_NAME) {
+      try {
+        const result = await uploadImage(base64)
+        url = result.url
+        publicId = result.publicId
+      } catch {
+        url = base64
+      }
+    } else {
+      url = base64
+    }
 
     const asset = await prisma.mediaAsset.create({
       data: {
-        url: result.url,
-        publicId: result.publicId,
+        url,
+        publicId,
         filename,
         mimeType,
         size: buffer.length,
