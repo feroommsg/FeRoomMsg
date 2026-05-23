@@ -702,9 +702,6 @@ export function PartnersContent({ partners }: PartnersContentProps) {
               <h3 className="text-base font-bold text-white">
                 {isAr ? partner.nameAr : partner.nameEn}
               </h3>
-              {partner.type && (
-                <p className="mt-1 text-xs uppercase tracking-wider text-[#c9a35c]">{partner.type}</p>
-              )}
             </div>
           ))}
         </div>
