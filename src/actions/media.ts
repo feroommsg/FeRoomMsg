@@ -3,7 +3,7 @@
 import { cookies } from "next/headers"
 import { prisma } from "@/lib/prisma"
 import { verifyToken } from "@/lib/auth"
-import { uploadImage } from "@/lib/cloudinary"
+import { uploadImage, uploadFile } from "@/lib/cloudinary"
 import { success, error, validateImageType, validateImageSize } from "@/lib/utils"
 
 async function requireAuth() {
@@ -43,19 +43,23 @@ export async function uploadMedia(base64: string, filename: string) {
       return error(mimeType === "application/pdf" ? "PDF size exceeds 20MB limit" : "Image size exceeds 5MB limit")
     }
 
+    const isPdf = mimeType === "application/pdf"
+
+    if (isPdf && !process.env.CLOUDINARY_CLOUD_NAME) {
+      return error("Cloudinary is required for PDF uploads. Please configure CLOUDINARY_CLOUD_NAME.")
+    }
+
     let url: string
     let publicId: string | null = null
 
-    // Try Cloudinary first, fall back to base64 if not configured
-    if (process.env.CLOUDINARY_CLOUD_NAME) {
-      try {
-        const result = await uploadImage(base64)
-        url = result.url
-        publicId = result.publicId
-      } catch {
-        url = base64
+    try {
+      const result = isPdf ? await uploadFile(base64) : await uploadImage(base64)
+      url = result.url
+      publicId = result.publicId
+    } catch (err) {
+      if (isPdf) {
+        return error(err instanceof Error ? err.message : "Failed to upload PDF to Cloudinary")
       }
-    } else {
       url = base64
     }
 
@@ -95,8 +99,12 @@ export async function deleteMedia(id: string) {
     const asset = await prisma.mediaAsset.findUnique({ where: { id } })
     if (!asset) return error("Media not found")
     if (asset.publicId) {
-      const { deleteImage } = await import("@/lib/cloudinary")
-      await deleteImage(asset.publicId)
+      const { deleteImage, deleteFile } = await import("@/lib/cloudinary")
+      try {
+        await deleteImage(asset.publicId)
+      } catch {
+        await deleteFile(asset.publicId)
+      }
     }
     await prisma.mediaAsset.delete({ where: { id } })
     return success(null)
