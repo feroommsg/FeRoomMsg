@@ -1,4 +1,3 @@
-export { getActiveProjects, getAllProjects, getProjectById, createProject, updateProject, deleteProject, deleteProjectImage, reorderProjects, toggleFeatured } from "./projects"
 export { getActiveCapabilities, getAllCapabilities, createCapability, updateCapability, deleteCapability, reorderCapabilities } from "./capabilities"
 export { getActiveSectors, getAllSectors, createSector, updateSector, deleteSector, reorderSectors } from "./sectors"
 export { getActiveMetrics, getAllMetrics, createMetric, updateMetric, deleteMetric, reorderMetrics } from "./metrics"

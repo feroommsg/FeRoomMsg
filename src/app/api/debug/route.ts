@@ -7,10 +7,6 @@ export async function GET() {
       include: { images: true },
       orderBy: { sortOrder: "asc" },
     })
-    const projects = await prisma.project.findMany({
-      include: { images: true },
-      orderBy: { sortOrder: "asc" },
-    })
     const partners = await prisma.partner.findMany()
 
     return NextResponse.json({
@@ -20,18 +16,6 @@ export async function GET() {
         titleEn: i.titleEn,
         imageCount: i.images.length,
         images: i.images.map((img) => ({
-          id: img.id,
-          imageUrlLength: img.imageUrl?.length || 0,
-          imageUrlPrefix: img.imageUrl?.substring(0, 50) || "",
-          isCover: img.isCover,
-        })),
-      })),
-      projectCount: projects.length,
-      projects: projects.map((p) => ({
-        id: p.id,
-        titleEn: p.titleEn,
-        imageCount: p.images.length,
-        images: p.images.map((img) => ({
           id: img.id,
           imageUrlLength: img.imageUrl?.length || 0,
           imageUrlPrefix: img.imageUrl?.substring(0, 50) || "",

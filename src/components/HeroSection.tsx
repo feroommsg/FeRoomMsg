@@ -67,10 +67,10 @@ export default function HeroSection({
 
           <div className={`mt-8 flex gap-4 ${isAr ? "flex-row-reverse self-start" : ""}`}>
             <Link
-              href="/projects"
+              href="/catalog"
               className="rounded-md bg-[#c9a35c] px-6 py-3 text-sm font-semibold text-[#0d0d0b] transition-colors hover:bg-[#b8922f]"
             >
-              {isAr ? "عرض الأعمال" : "View Portfolio"}
+              {isAr ? "معرض الصور" : "View Gallery"}
             </Link>
             <Link
               href="/capabilities"

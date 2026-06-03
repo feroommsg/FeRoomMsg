@@ -95,42 +95,6 @@ model Sector {
   updatedAt DateTime @updatedAt
 }
 
-model Project {
-  id         String         @id @default(cuid())
-  titleEn    String
-  titleAr    String
-  categoryEn String
-  categoryAr String
-  locationEn String
-  locationAr String
-  year       String
-  size       String
-  summaryEn  String
-  summaryAr  String
-  imageUrl   String?
-  isFeatured Boolean        @default(false)
-  sortOrder  Int            @default(0)
-  isActive   Boolean        @default(true)
-  createdAt  DateTime       @default(now())
-  updatedAt  DateTime       @updatedAt
-  images     ProjectImage[] @relation("ProjectImages")
-}
-
-model ProjectImage {
-  id        String   @id @default(cuid())
-  project   Project  @relation("ProjectImages", fields: [projectId], references: [id], onDelete: Cascade)
-  projectId String
-  imageUrl  String
-  altText   String?
-  sortOrder Int      @default(0)
-  isCover   Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([projectId])
-  @@index([isCover])
-}
-
 model Material {
   id             String   @id @default(cuid())
   nameEn         String

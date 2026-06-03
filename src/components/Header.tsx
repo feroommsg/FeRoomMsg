@@ -15,7 +15,7 @@ interface HeaderProps {
 const navLinks = [
   { href: "/company", labelEn: "Company", labelAr: "الشركة" },
   { href: "/capabilities", labelEn: "Capabilities", labelAr: "الإمكانيات" },
-  { href: "/projects", labelEn: "Projects", labelAr: "المشاريع" },
+
   { href: "/materials", labelEn: "Materials", labelAr: "المواد" },
   { href: "/catalog", labelEn: "Catalog", labelAr: "الكتالوج" },
   { href: "/partners", labelEn: "Partners", labelAr: "الشركاء" },

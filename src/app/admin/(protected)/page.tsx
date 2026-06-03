@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { verifySession } from "@/actions/admin-auth"
-import { getAllProjects, getAllMaterials, getAllCatalogItems, getAllPartners } from "@/actions"
-import { LayoutDashboard, Package, BookOpen, Handshake, FolderKanban, Loader2, ArrowUpRight } from "lucide-react"
+import { getAllMaterials, getAllCatalogItems, getAllPartners } from "@/actions"
+import { LayoutDashboard, Package, BookOpen, Handshake, Loader2, ArrowUpRight } from "lucide-react"
 
 interface SessionData {
   email: string
@@ -12,14 +12,13 @@ interface SessionData {
 
 export default function AdminDashboardPage() {
   const [session, setSession] = useState<SessionData | null>(null)
-  const [counts, setCounts] = useState({ projects: 0, materials: 0, catalog: 0, partners: 0 })
+  const [counts, setCounts] = useState({ materials: 0, catalog: 0, partners: 0 })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function init() {
-      const [sessionRes, projectsRes, materialsRes, catalogRes, partnersRes] = await Promise.all([
+      const [sessionRes, materialsRes, catalogRes, partnersRes] = await Promise.all([
         verifySession(),
-        getAllProjects(),
         getAllMaterials(),
         getAllCatalogItems(),
         getAllPartners(),
@@ -28,7 +27,6 @@ export default function AdminDashboardPage() {
         setSession(sessionRes.data as SessionData)
       }
       setCounts({
-        projects: (projectsRes.data as unknown[])?.length ?? 0,
         materials: (materialsRes.data as unknown[])?.length ?? 0,
         catalog: (catalogRes.data as unknown[])?.length ?? 0,
         partners: (partnersRes.data as unknown[])?.length ?? 0,
@@ -47,7 +45,6 @@ export default function AdminDashboardPage() {
   }
 
   const cards = [
-    { label: "Projects", count: counts.projects, href: "/admin/projects", icon: FolderKanban },
     { label: "Materials", count: counts.materials, href: "/admin/materials", icon: Package },
     { label: "Catalog Items", count: counts.catalog, href: "/admin/catalog", icon: BookOpen },
     { label: "Partners", count: counts.partners, href: "/admin/partners", icon: Handshake },

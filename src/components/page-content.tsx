@@ -16,7 +16,6 @@ import {
   Users,
   Building2,
   Wrench,
-  FolderOpen,
   Package,
   BookOpen,
   Handshake,
@@ -34,7 +33,6 @@ import {
 } from "lucide-react"
 import { useLang } from "@/lib/lang-context"
 import HeroSection from "./HeroSection"
-import ProjectCard from "./ProjectCard"
 import PageShell from "./PageShell"
 import CatalogGallery from "./CatalogGallery"
 
@@ -51,7 +49,6 @@ const iconMap: Record<string, LucideIcon> = {
   Users,
   Building2,
   Wrench,
-  FolderOpen,
   Package,
   BookOpen,
   Handshake,
@@ -82,7 +79,6 @@ interface HomeContentProps {
   metrics: Record<string, any>[]
   trustItems: Record<string, any>[]
   capabilities: Record<string, any>[]
-  projects: Record<string, any>[]
   sectors: Record<string, any>[]
   settings: Record<string, any> | null
 }
@@ -92,7 +88,6 @@ export function HomeContent({
   metrics,
   trustItems,
   capabilities,
-  projects,
   sectors,
   settings,
 }: HomeContentProps) {
@@ -111,8 +106,6 @@ export function HomeContent({
     value: m.value,
     label: isAr ? m.labelAr : m.labelEn,
   }))
-
-  const featuredProjects = projects.filter((p) => p.isFeatured).slice(0, 3)
 
   return (
     <>
@@ -164,18 +157,6 @@ export function HomeContent({
                 )}
               </div>
               <div className="flex flex-1 flex-col gap-6">
-                <Link
-                  href="/projects"
-                  className="group rounded-lg border border-[#e8e2d6]/10 bg-[#11110f] p-8 transition-colors hover:border-[#c9a35c]/40"
-                >
-                  <FolderOpen className="mb-3 h-8 w-8 text-[#c9a35c]" />
-                  <h3 className="text-lg font-bold text-white">
-                    {isAr ? "مشاريعنا" : "Our Projects"}
-                  </h3>
-                  <p className="mt-2 text-sm text-[#e8e2d6]/50">
-                    {isAr ? "تصفح أحدث مشاريعنا" : "Browse our latest projects"}
-                  </p>
-                </Link>
                 <Link
                   href="/materials"
                   className="group rounded-lg border border-[#e8e2d6]/10 bg-[#11110f] p-8 transition-colors hover:border-[#c9a35c]/40"
@@ -236,34 +217,6 @@ export function HomeContent({
         </section>
       )}
 
-      {featuredProjects.length > 0 && (
-        <section className="bg-[#0d0d0b] px-6 py-24 md:py-32">
-          <div className="mx-auto max-w-7xl">
-            <SectionHeader
-              title={isAr ? "مشاريع مميزة" : "Featured Projects"}
-              subtitle={
-                isAr
-                  ? "نفخر بتقديم مجموعة من أبرز أعمالنا"
-                  : "Showcasing some of our finest work"
-              }
-            />
-            <div className="flex flex-col gap-16">
-              {featuredProjects.map((project, i) => (
-                <ProjectCard key={project.id} project={project as any} lang={lang} index={i} />
-              ))}
-            </div>
-            <div className="mt-12 text-center">
-              <Link
-                href="/projects"
-                className="inline-flex items-center gap-2 rounded-md bg-[#c9a35c] px-6 py-3 text-sm font-semibold text-[#0d0d0b] transition-colors hover:bg-[#b8922f]"
-              >
-                {isAr ? "جميع المشاريع" : "All Projects"}
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
-
       {sectors.length > 0 && (
         <section className="border-t border-[#e8e2d6]/5 bg-[#11110f] px-6 py-24 md:py-32">
           <div className="mx-auto max-w-7xl">
@@ -307,7 +260,7 @@ export function HomeContent({
             {[
               { href: "/company", icon: Building2, labelEn: "Company", labelAr: "الشركة" },
               { href: "/capabilities", icon: Wrench, labelEn: "Capabilities", labelAr: "الإمكانيات" },
-              { href: "/projects", icon: FolderOpen, labelEn: "Projects", labelAr: "المشاريع" },
+
               { href: "/materials", icon: Package, labelEn: "Materials", labelAr: "المواد" },
               { href: "/catalog", icon: BookOpen, labelEn: "Catalog", labelAr: "الكتالوج" },
               { href: "/partners", icon: Handshake, labelEn: "Partners", labelAr: "الشركاء" },
@@ -489,40 +442,6 @@ export function CapabilitiesContent({ capabilities, sectors }: CapabilitiesConte
               </div>
             ))}
           </div>
-        </div>
-      )}
-    </PageShell>
-  )
-}
-
-interface ProjectsContentProps {
-  projects: Record<string, any>[]
-}
-
-export function ProjectsContent({ projects }: ProjectsContentProps) {
-  const { lang } = useLang()
-  const isAr = lang === "ar"
-
-  return (
-    <PageShell
-      label={isAr ? "المشاريع" : "Projects"}
-      title={isAr ? "مشاريعنا" : "Our Projects"}
-      text={
-        isAr
-          ? "مجموعة من أبرز المشاريع التي قمنا بتنفيذها"
-          : "A selection of our most notable completed projects"
-      }
-      lang={lang}
-    >
-      {projects.length === 0 ? (
-        <p className="text-center text-[#e8e2d6]/40">
-          {isAr ? "لا توجد مشاريع حالياً" : "No projects available"}
-        </p>
-      ) : (
-        <div className="flex flex-col gap-16">
-          {projects.map((project, i) => (
-            <ProjectCard key={project.id} project={project as any} lang={lang} index={i} />
-          ))}
         </div>
       )}
     </PageShell>

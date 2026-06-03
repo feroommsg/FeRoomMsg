@@ -75,7 +75,7 @@ async function main() {
 
   // Metrics
   const metrics = [
-    { value: "+80", labelEn: "Projects Delivered", labelAr: "مشروع منفذ", sortOrder: 0 },
+    { value: "+80", labelEn: "Works Completed", labelAr: "مشروع منفذ", sortOrder: 0 },
     { value: "+12", labelEn: "Business Sectors", labelAr: "قطاع عمل", sortOrder: 1 },
     { value: "+25", labelEn: "Material Categories", labelAr: "تصنيف خامات", sortOrder: 2 },
     { value: "360°", labelEn: "Execution Scope", labelAr: "نطاق تنفيذ متكامل", sortOrder: 3 },
@@ -161,130 +161,6 @@ async function main() {
     }
   }
 
-  // Projects
-  const projectsData = [
-    {
-      titleEn: "Corporate Headquarters Fit-Out",
-      titleAr: "تشطيب مقر إداري",
-      categoryEn: "Commercial Interiors",
-      categoryAr: "تشطيبات تجارية",
-      locationEn: "Cairo, Egypt",
-      locationAr: "القاهرة، مصر",
-      year: "2026",
-      size: "1,850 m²",
-      summaryEn:
-        "Turnkey execution for a premium administrative workspace including partitions, ceilings, flooring, lighting, metal details, and custom joinery.",
-      summaryAr:
-        "تنفيذ متكامل لمساحة إدارية تشمل القواطيع، الأسقف، الأرضيات، الإضاءة، التفاصيل المعدنية، والأعمال الخشبية المخصصة.",
-      isFeatured: true,
-      sortOrder: 0,
-      images: [
-        {
-          url: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1800&auto=format&fit=crop",
-          alt: "Corporate HQ Fit-Out",
-          sortOrder: 0,
-          isCover: true,
-        },
-        {
-          url: "https://images.unsplash.com/photo-1504204367264-00d8f11ddc7a?q=80&w=1800&auto=format&fit=crop",
-          alt: "Corporate HQ Detail",
-          sortOrder: 1,
-          isCover: false,
-        },
-      ],
-    },
-    {
-      titleEn: "Retail Display Structure",
-      titleAr: "هيكل عرض تجاري",
-      categoryEn: "Fabrication & Installation",
-      categoryAr: "تصنيع وتركيب",
-      locationEn: "New Cairo",
-      locationAr: "القاهرة الجديدة",
-      year: "2025",
-      size: "420 m²",
-      summaryEn:
-        "Custom engineered display systems with steel, wood, acrylic, and premium finishing for high-traffic retail use.",
-      summaryAr:
-        "تصنيع وحدات عرض مخصصة باستخدام المعدن، الخشب، الأكريليك، وتشطيبات قوية مناسبة للاستخدام التجاري.",
-      isFeatured: true,
-      sortOrder: 1,
-      images: [
-        {
-          url: "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?q=80&w=1800&auto=format&fit=crop",
-          alt: "Retail Display Structure",
-          sortOrder: 0,
-          isCover: true,
-        },
-        {
-          url: "https://images.unsplash.com/photo-1518821929447-38f6e11e3b04?q=80&w=1800&auto=format&fit=crop",
-          alt: "Retail Display Detail",
-          sortOrder: 1,
-          isCover: false,
-        },
-      ],
-    },
-    {
-      titleEn: "Residential Finishing Works",
-      titleAr: "تشطيب وحدة سكنية",
-      categoryEn: "Residential Contracting",
-      categoryAr: "مقاولات سكنية",
-      locationEn: "Heliopolis",
-      locationAr: "مصر الجديدة",
-      year: "2025",
-      size: "310 m²",
-      summaryEn:
-        "Complete finishing package from site preparation to final delivery with coordinated materials, lighting, doors, floors, and wall treatments.",
-      summaryAr:
-        "باقة تشطيب كاملة من تجهيز الموقع حتى التسليم النهائي مع تنسيق الخامات، الإضاءة، الأبواب، الأرضيات، ومعالجات الحوائط.",
-      isFeatured: true,
-      sortOrder: 2,
-      images: [
-        {
-          url: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=1800&auto=format&fit=crop",
-          alt: "Residential Finishing",
-          sortOrder: 0,
-          isCover: true,
-        },
-        {
-          url: "https://images.unsplash.com/photo-1571019613404-1b7e3398d43b?q=80&w=1800&auto=format&fit=crop",
-          alt: "Residential Finishing Detail",
-          sortOrder: 1,
-          isCover: false,
-        },
-      ],
-    },
-  ]
-
-  for (const projectData of projectsData) {
-    const project = await prisma.project.create({
-      data: {
-        titleEn: projectData.titleEn,
-        titleAr: projectData.titleAr,
-        categoryEn: projectData.categoryEn,
-        categoryAr: projectData.categoryAr,
-        locationEn: projectData.locationEn,
-        locationAr: projectData.locationAr,
-        year: projectData.year,
-        size: projectData.size,
-        summaryEn: projectData.summaryEn,
-        summaryAr: projectData.summaryAr,
-        isFeatured: projectData.isFeatured,
-        sortOrder: projectData.sortOrder,
-      },
-    })
-
-    for (const imageData of projectData.images) {
-      await prisma.projectImage.create({
-        data: {
-          projectId: project.id,
-          imageUrl: imageData.url,
-          altText: imageData.alt,
-          sortOrder: imageData.sortOrder,
-          isCover: imageData.isCover,
-        },
-      })
-    }
-  }
 
   // Materials
   const materials = [

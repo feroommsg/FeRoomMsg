@@ -30,7 +30,7 @@ const links = [
   { href: "/admin/home", label: "Home Content", icon: Home },
   { href: "/admin/company", label: "Company", icon: Building2 },
   { href: "/admin/capabilities", label: "Capabilities", icon: Cpu },
-  { href: "/admin/projects", label: "Projects", icon: FolderKanban },
+
   { href: "/admin/materials", label: "Materials", icon: Package },
   { href: "/admin/catalog", label: "Catalog", icon: BookOpen },
   { href: "/admin/partners", label: "Partners", icon: Handshake },
