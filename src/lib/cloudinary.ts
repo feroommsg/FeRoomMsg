@@ -16,7 +16,7 @@ export async function uploadImage(
 
   const result = await cloudinary.uploader.upload(base64Image, {
     folder,
-    resource_type: "image",
+    resource_type: "auto",
   })
 
   return {

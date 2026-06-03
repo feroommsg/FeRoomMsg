@@ -28,6 +28,8 @@ import {
   Mail,
   Send,
   ExternalLink,
+  Download,
+  FileText,
   type LucideIcon,
 } from "lucide-react"
 import { useLang } from "@/lib/lang-context"
@@ -615,6 +617,20 @@ export function MaterialViewer({ materials }: MaterialViewerProps) {
                     <p className="mt-2 text-sm leading-relaxed text-[#e8e2d6]/60">
                       {isAr ? selected.applicationsAr : selected.applicationsEn}
                     </p>
+                  </div>
+                )}
+                {selected.pdfUrl && (
+                  <div className="mt-6 border-t border-[#e8e2d6]/10 pt-4">
+                    <a
+                      href={selected.pdfUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-md bg-[#c9a35c] px-4 py-2 text-sm font-semibold text-[#0d0d0b] transition-colors hover:bg-[#b8922f]"
+                    >
+                      <FileText size={16} />
+                      <Download size={16} />
+                      {isAr ? "تحميل الكتيب (PDF)" : "Download Brochure (PDF)"}
+                    </a>
                   </div>
                 )}
               </div>

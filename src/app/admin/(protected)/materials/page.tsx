@@ -4,8 +4,9 @@ import { useState, useEffect } from "react"
 import { getAllMaterials, createMaterial, updateMaterial, deleteMaterial } from "@/actions"
 import { uploadMedia } from "@/actions/media"
 import ImageUploader from "@/components/ImageUploader"
+import PdfUploader from "@/components/PdfUploader"
 import AdminTable from "@/components/AdminTable"
-import { Loader2, X } from "lucide-react"
+import { Loader2, X, FileText } from "lucide-react"
 
 interface Material {
   id: string
@@ -16,12 +17,13 @@ interface Material {
   applicationsEn: string
   applicationsAr: string
   imageUrl: string
+  pdfUrl: string | null
   sortOrder: number
 }
 
 const emptyForm = {
   nameEn: "", nameAr: "", descriptionEn: "", descriptionAr: "",
-  applicationsEn: "", applicationsAr: "", imageUrl: "", sortOrder: 0,
+  applicationsEn: "", applicationsAr: "", imageUrl: "", pdfUrl: "", sortOrder: 0,
 }
 
 export default function AdminMaterialsPage() {
@@ -29,6 +31,8 @@ export default function AdminMaterialsPage() {
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState<{ item?: Material } & typeof emptyForm | null>(null)
   const [saving, setSaving] = useState(false)
+  const [imageError, setImageError] = useState<string | null>(null)
+  const [pdfError, setPdfError] = useState<string | null>(null)
 
   const load = async () => {
     const res = await getAllMaterials()
@@ -46,12 +50,13 @@ export default function AdminMaterialsPage() {
   const handleSave = async () => {
     if (!modal) return
     setSaving(true)
-    const data = {
+    const data: Record<string, any> = {
       nameEn: modal.nameEn, nameAr: modal.nameAr,
       descriptionEn: modal.descriptionEn, descriptionAr: modal.descriptionAr,
       applicationsEn: modal.applicationsEn, applicationsAr: modal.applicationsAr,
       imageUrl: modal.imageUrl, sortOrder: modal.sortOrder,
     }
+    if (modal.pdfUrl) data.pdfUrl = modal.pdfUrl
     if (modal.item) {
       await updateMaterial(modal.item.id, data)
     } else {
@@ -63,6 +68,7 @@ export default function AdminMaterialsPage() {
   }
 
   const handleImageUpload = async (base64: string) => {
+    setImageError(null)
     if (!base64) {
       setModal((m) => m ? { ...m, imageUrl: "" } : null)
       return
@@ -71,6 +77,23 @@ export default function AdminMaterialsPage() {
     if (res.success) {
       const asset = res.data as { url: string }
       setModal((m) => m ? { ...m, imageUrl: asset.url } : null)
+    } else {
+      setImageError(res.error || "Upload failed")
+    }
+  }
+
+  const handlePdfUpload = async (base64: string) => {
+    setPdfError(null)
+    if (!base64) {
+      setModal((m) => m ? { ...m, pdfUrl: "" } : null)
+      return
+    }
+    const res = await uploadMedia(base64, "material-pdf")
+    if (res.success) {
+      const asset = res.data as { url: string }
+      setModal((m) => m ? { ...m, pdfUrl: asset.url } : null)
+    } else {
+      setPdfError(res.error || "Upload failed")
     }
   }
 
@@ -80,15 +103,43 @@ export default function AdminMaterialsPage() {
 
       <AdminTable
         columns={[
+          {
+            key: "imageUrl",
+            label: "Image",
+            render: (item) => {
+              const m = item as Material
+              return m.imageUrl ? (
+                <div className="h-10 w-10 overflow-hidden rounded">
+                  <img src={m.imageUrl} alt="" className="h-full w-full object-cover" />
+                </div>
+              ) : (
+                <span className="text-xs text-[#e8e2d6]/30">—</span>
+              )
+            },
+          },
           { key: "nameEn", label: "Name (EN)" },
           { key: "nameAr", label: "Name (AR)" },
+          {
+            key: "pdfUrl",
+            label: "PDF",
+            render: (item) => {
+              const m = item as Material
+              return m.pdfUrl ? (
+                <a href={m.pdfUrl} target="_blank" rel="noopener noreferrer" className="text-[#c9a35c] hover:underline">
+                  <FileText size={14} />
+                </a>
+              ) : (
+                <span className="text-xs text-[#e8e2d6]/30">—</span>
+              )
+            },
+          },
           { key: "sortOrder", label: "Order" },
         ]}
         data={items}
         loading={loading}
         onEdit={(item) => {
           const m = item as Material
-          setModal({ item: m, ...m })
+          setModal({ item: m, ...m, pdfUrl: m.pdfUrl || "" })
         }}
         onDelete={handleDelete}
         onCreate={() => setModal({ ...emptyForm, sortOrder: items.length })}
@@ -116,7 +167,12 @@ export default function AdminMaterialsPage() {
                 <TextareaField label="Applications (AR)" value={modal.applicationsAr} onChange={(v) => setModal({ ...modal, applicationsAr: v })} />
               </div>
               <InputField label="Sort Order" type="number" value={String(modal.sortOrder)} onChange={(v) => setModal({ ...modal, sortOrder: parseInt(v) || 0 })} />
+
+              {imageError && <p className="text-xs text-red-400">{imageError}</p>}
               <ImageUploader label="Material Image" currentImage={modal.imageUrl} onUpload={handleImageUpload} />
+
+              {pdfError && <p className="text-xs text-red-400">{pdfError}</p>}
+              <PdfUploader label="PDF Brochure" currentPdf={modal.pdfUrl} onUpload={handlePdfUpload} />
 
               <div className="flex items-center gap-3 pt-2">
                 <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 rounded-md bg-[#c9a35c] px-4 py-2 text-sm font-semibold text-[#0d0d0b] hover:bg-[#b8922f] disabled:opacity-60">

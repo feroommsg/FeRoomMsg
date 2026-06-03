@@ -19,19 +19,28 @@ export async function uploadMedia(base64: string, filename: string) {
   try {
     await requireAuth()
 
-    const matches = base64.match(/^data:(image\/(\w+));base64,(.+)$/)
-    if (!matches) return error("Invalid base64 image data")
+    let mimeType: string
+    let rawBase64: string
 
-    const mimeType = matches[1]
-    const rawBase64 = matches[3]
+    const imageMatch = base64.match(/^data:(image\/(\w+));base64,(.+)$/)
+    const pdfMatch = base64.match(/^data:(application\/pdf);base64,(.+)$/)
 
-    if (!validateImageType(mimeType)) {
-      return error("Invalid image type. Allowed: jpeg, png, webp, gif, avif")
+    if (imageMatch) {
+      mimeType = imageMatch[1]
+      rawBase64 = imageMatch[3]
+      if (!validateImageType(mimeType)) {
+        return error("Invalid image type. Allowed: jpeg, png, webp, gif, avif")
+      }
+    } else if (pdfMatch) {
+      mimeType = pdfMatch[1]
+      rawBase64 = pdfMatch[3]
+    } else {
+      return error("Invalid file data. Only images and PDFs are supported.")
     }
 
     const buffer = Buffer.from(rawBase64, "base64")
-    if (!validateImageSize(buffer.length)) {
-      return error("Image size exceeds 5MB limit")
+    if (!validateImageSize(buffer.length, mimeType === "application/pdf" ? 20 : 5)) {
+      return error(mimeType === "application/pdf" ? "PDF size exceeds 20MB limit" : "Image size exceeds 5MB limit")
     }
 
     let url: string

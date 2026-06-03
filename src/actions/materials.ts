@@ -47,6 +47,7 @@ export async function createMaterial(data: {
   applicationsEn: string
   applicationsAr: string
   imageUrl: string
+  pdfUrl?: string
   sortOrder?: number
   isActive?: boolean
 }) {
@@ -68,6 +69,7 @@ export async function updateMaterial(id: string, data: {
   applicationsEn?: string
   applicationsAr?: string
   imageUrl?: string
+  pdfUrl?: string
   sortOrder?: number
   isActive?: boolean
 }) {
