@@ -99,12 +99,16 @@ model Material {
   id             String   @id @default(cuid())
   nameEn         String
   nameAr         String
+  categoryEn     String?
+  categoryAr     String?
   descriptionEn  String
   descriptionAr  String
   applicationsEn String
   applicationsAr String
   imageUrl       String
   pdfUrl         String?
+  pdfSize        Int?
+  pdfName        String?
   sortOrder      Int      @default(0)
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())

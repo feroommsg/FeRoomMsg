@@ -42,12 +42,16 @@ export async function getAllMaterials() {
 export async function createMaterial(data: {
   nameEn: string
   nameAr: string
+  categoryEn?: string
+  categoryAr?: string
   descriptionEn: string
   descriptionAr: string
   applicationsEn: string
   applicationsAr: string
   imageUrl: string
   pdfUrl?: string
+  pdfSize?: number
+  pdfName?: string
   sortOrder?: number
   isActive?: boolean
 }) {
@@ -64,12 +68,16 @@ export async function createMaterial(data: {
 export async function updateMaterial(id: string, data: {
   nameEn?: string
   nameAr?: string
+  categoryEn?: string
+  categoryAr?: string
   descriptionEn?: string
   descriptionAr?: string
   applicationsEn?: string
   applicationsAr?: string
   imageUrl?: string
   pdfUrl?: string
+  pdfSize?: number
+  pdfName?: string
   sortOrder?: number
   isActive?: boolean
 }) {

@@ -5,6 +5,7 @@ import { getAllMaterials, createMaterial, updateMaterial, deleteMaterial } from 
 import { uploadMedia } from "@/actions/media"
 import ImageUploader from "@/components/ImageUploader"
 import PdfUploader from "@/components/PdfUploader"
+import type { PdfFileInfo } from "@/components/PdfUploader"
 import AdminTable from "@/components/AdminTable"
 import { Loader2, X, FileText } from "lucide-react"
 
@@ -12,18 +13,31 @@ interface Material {
   id: string
   nameEn: string
   nameAr: string
+  categoryEn: string | null
+  categoryAr: string | null
   descriptionEn: string
   descriptionAr: string
   applicationsEn: string
   applicationsAr: string
   imageUrl: string
   pdfUrl: string | null
+  pdfSize: number | null
+  pdfName: string | null
   sortOrder: number
 }
 
 const emptyForm = {
-  nameEn: "", nameAr: "", descriptionEn: "", descriptionAr: "",
-  applicationsEn: "", applicationsAr: "", imageUrl: "", pdfUrl: "", sortOrder: 0,
+  nameEn: "", nameAr: "", categoryEn: "", categoryAr: "",
+  descriptionEn: "", descriptionAr: "",
+  applicationsEn: "", applicationsAr: "",
+  imageUrl: "", pdfUrl: "", pdfSize: 0, pdfName: "",
+  sortOrder: 0,
+}
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
 export default function AdminMaterialsPage() {
@@ -52,11 +66,15 @@ export default function AdminMaterialsPage() {
     setSaving(true)
     const data: Record<string, any> = {
       nameEn: modal.nameEn, nameAr: modal.nameAr,
+      categoryEn: modal.categoryEn || undefined,
+      categoryAr: modal.categoryAr || undefined,
       descriptionEn: modal.descriptionEn, descriptionAr: modal.descriptionAr,
       applicationsEn: modal.applicationsEn, applicationsAr: modal.applicationsAr,
       imageUrl: modal.imageUrl, sortOrder: modal.sortOrder,
     }
     if (modal.pdfUrl) data.pdfUrl = modal.pdfUrl
+    if (modal.pdfSize) data.pdfSize = modal.pdfSize
+    if (modal.pdfName) data.pdfName = modal.pdfName
     if (modal.item) {
       await updateMaterial(modal.item.id, data)
     } else {
@@ -82,19 +100,19 @@ export default function AdminMaterialsPage() {
     }
   }
 
-  const handlePdfUpload = async (base64: string) => {
+  const handlePdfUpload = async (info: PdfFileInfo) => {
     setPdfError(null)
-    if (!base64) {
-      setModal((m) => m ? { ...m, pdfUrl: "" } : null)
-      return
-    }
-    const res = await uploadMedia(base64, "material-pdf")
+    const res = await uploadMedia(info.base64, "material-pdf")
     if (res.success) {
       const asset = res.data as { url: string }
-      setModal((m) => m ? { ...m, pdfUrl: asset.url } : null)
+      setModal((m) => m ? { ...m, pdfUrl: asset.url, pdfSize: info.size, pdfName: info.name } : null)
     } else {
       setPdfError(res.error || "Upload failed")
     }
+  }
+
+  const handlePdfRemove = () => {
+    setModal((m) => m ? { ...m, pdfUrl: "", pdfSize: 0, pdfName: "" } : null)
   }
 
   return (
@@ -119,15 +137,17 @@ export default function AdminMaterialsPage() {
           },
           { key: "nameEn", label: "Name (EN)" },
           { key: "nameAr", label: "Name (AR)" },
+          { key: "categoryEn", label: "Category", render: (item) => (item as Material).categoryEn || "-" },
           {
             key: "pdfUrl",
             label: "PDF",
             render: (item) => {
               const m = item as Material
               return m.pdfUrl ? (
-                <a href={m.pdfUrl} target="_blank" rel="noopener noreferrer" className="text-[#c9a35c] hover:underline">
-                  <FileText size={14} />
-                </a>
+                <div className="flex items-center gap-1">
+                  <FileText size={12} className="text-[#c9a35c]" />
+                  {m.pdfSize && <span className="text-[10px] text-[#e8e2d6]/40">{formatSize(m.pdfSize)}</span>}
+                </div>
               ) : (
                 <span className="text-xs text-[#e8e2d6]/30">—</span>
               )
@@ -139,7 +159,16 @@ export default function AdminMaterialsPage() {
         loading={loading}
         onEdit={(item) => {
           const m = item as Material
-          setModal({ item: m, ...m, pdfUrl: m.pdfUrl || "" })
+          setModal({
+            item: m,
+            nameEn: m.nameEn, nameAr: m.nameAr,
+            categoryEn: m.categoryEn || "", categoryAr: m.categoryAr || "",
+            descriptionEn: m.descriptionEn, descriptionAr: m.descriptionAr,
+            applicationsEn: m.applicationsEn, applicationsAr: m.applicationsAr,
+            imageUrl: m.imageUrl,
+            pdfUrl: m.pdfUrl || "", pdfSize: m.pdfSize || 0, pdfName: m.pdfName || "",
+            sortOrder: m.sortOrder,
+          })
         }}
         onDelete={handleDelete}
         onCreate={() => setModal({ ...emptyForm, sortOrder: items.length })}
@@ -147,7 +176,7 @@ export default function AdminMaterialsPage() {
 
       {modal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-lg border border-[#e8e2d6]/10 bg-[#11110f] p-6 shadow-xl">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-[#e8e2d6]/10 bg-[#11110f] p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-base font-semibold text-[#e8e2d6]">
                 {modal.item ? "Edit Material" : "New Material"}
@@ -159,8 +188,10 @@ export default function AdminMaterialsPage() {
 
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <InputField label="Name (EN)" value={modal.nameEn} onChange={(v) => setModal({ ...modal, nameEn: v })} />
-                <InputField label="Name (AR)" value={modal.nameAr} onChange={(v) => setModal({ ...modal, nameAr: v })} />
+                <InputField label="Title (EN)" value={modal.nameEn} onChange={(v) => setModal({ ...modal, nameEn: v })} />
+                <InputField label="Title (AR)" value={modal.nameAr} onChange={(v) => setModal({ ...modal, nameAr: v })} />
+                <InputField label="Category (EN)" value={modal.categoryEn} onChange={(v) => setModal({ ...modal, categoryEn: v })} />
+                <InputField label="Category (AR)" value={modal.categoryAr} onChange={(v) => setModal({ ...modal, categoryAr: v })} />
                 <TextareaField label="Description (EN)" value={modal.descriptionEn} onChange={(v) => setModal({ ...modal, descriptionEn: v })} />
                 <TextareaField label="Description (AR)" value={modal.descriptionAr} onChange={(v) => setModal({ ...modal, descriptionAr: v })} />
                 <TextareaField label="Applications (EN)" value={modal.applicationsEn} onChange={(v) => setModal({ ...modal, applicationsEn: v })} />
@@ -169,10 +200,17 @@ export default function AdminMaterialsPage() {
               <InputField label="Sort Order" type="number" value={String(modal.sortOrder)} onChange={(v) => setModal({ ...modal, sortOrder: parseInt(v) || 0 })} />
 
               {imageError && <p className="text-xs text-red-400">{imageError}</p>}
-              <ImageUploader label="Material Image" currentImage={modal.imageUrl} onUpload={handleImageUpload} />
+              <ImageUploader label="Cover Image" currentImage={modal.imageUrl} onUpload={handleImageUpload} />
 
               {pdfError && <p className="text-xs text-red-400">{pdfError}</p>}
-              <PdfUploader label="PDF Brochure" currentPdf={modal.pdfUrl} onUpload={handlePdfUpload} />
+              <PdfUploader
+                label="PDF Catalog"
+                currentPdf={modal.pdfUrl}
+                currentPdfName={modal.pdfName}
+                currentPdfSize={modal.pdfSize}
+                onUpload={handlePdfUpload}
+                onRemove={handlePdfRemove}
+              />
 
               <div className="flex items-center gap-3 pt-2">
                 <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 rounded-md bg-[#c9a35c] px-4 py-2 text-sm font-semibold text-[#0d0d0b] hover:bg-[#b8922f] disabled:opacity-60">

@@ -35,6 +35,7 @@ import { useLang } from "@/lib/lang-context"
 import HeroSection from "./HeroSection"
 import PageShell from "./PageShell"
 import CatalogGallery from "./CatalogGallery"
+import PdfViewer from "./PdfViewer"
 
 const iconMap: Record<string, LucideIcon> = {
   Shield,
@@ -455,9 +456,18 @@ interface MaterialViewerProps {
 export function MaterialViewer({ materials }: MaterialViewerProps) {
   const { lang } = useLang()
   const isAr = lang === "ar"
-  const [selected, setSelected] = useState<Record<string, any> | null>(
-    materials.length > 0 ? materials[0] : null
-  )
+  const [viewerUrl, setViewerUrl] = useState<string | null>(null)
+  const [viewerTitle, setViewerTitle] = useState("")
+
+  const formatSize = (bytes: number) => {
+    if (!bytes) return ""
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
+
+  const truncate = (text: string, max: number) =>
+    text.length > max ? text.slice(0, max) + "..." : text
 
   if (materials.length === 0) {
     return (
@@ -485,78 +495,88 @@ export function MaterialViewer({ materials }: MaterialViewerProps) {
       }
       lang={lang}
     >
-      <div className={`flex flex-col gap-8 lg:flex-row ${isAr ? "lg:flex-row-reverse" : ""}`}>
-        <div className="w-full lg:w-80">
-          <div className="flex flex-col gap-2">
-            {materials.map((m) => {
-              const active = selected?.id === m.id
-              const name = isAr ? m.nameAr : m.nameEn
-              return (
-                <button
-                  key={m.id}
-                  onClick={() => setSelected(m)}
-                  className={`w-full rounded-lg px-4 py-3 text-left text-sm font-medium transition-all ${
-                    active
-                      ? "border border-[#c9a35c] bg-[#c9a35c]/10 text-[#c9a35c]"
-                      : "border border-[#e8e2d6]/10 bg-[#11110f] text-[#e8e2d6]/70 hover:border-[#e8e2d6]/20 hover:text-[#e8e2d6]"
-                  }`}
-                >
-                  {name}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        {selected && (
-          <div className="flex-1">
-            <div className="rounded-lg border border-[#e8e2d6]/10 bg-[#11110f] overflow-hidden">
-              {selected.imageUrl && (
-                <div className="relative aspect-video w-full">
-                  <Image
-                    src={selected.imageUrl}
-                    alt={isAr ? selected.nameAr : selected.nameEn}
-                    fill
-                    className="object-cover"
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {materials.map((m) => {
+          const name = isAr ? m.nameAr : m.nameEn
+          const category = isAr ? m.categoryAr : m.categoryEn
+          const desc = isAr ? m.descriptionAr : m.descriptionEn
+          return (
+            <div
+              key={m.id}
+              className="group flex flex-col overflow-hidden rounded-lg border border-[#e8e2d6]/10 bg-[#11110f] transition-all hover:border-[#c9a35c]/30"
+            >
+              <div className="relative aspect-[4/3] overflow-hidden bg-[#0d0d0b]">
+                {m.imageUrl ? (
+                  <img
+                    src={m.imageUrl}
+                    alt={name}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                </div>
-              )}
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-white">
-                  {isAr ? selected.nameAr : selected.nameEn}
-                </h3>
-                <p className="mt-3 text-sm leading-relaxed text-[#e8e2d6]/60">
-                  {isAr ? selected.descriptionAr : selected.descriptionEn}
-                </p>
-                {(selected.applicationsEn || selected.applicationsAr) && (
-                  <div className="mt-6 border-t border-[#e8e2d6]/10 pt-4">
-                    <h4 className="text-sm font-semibold uppercase tracking-wider text-[#c9a35c]">
-                      {isAr ? "التطبيقات" : "Applications"}
-                    </h4>
-                    <p className="mt-2 text-sm leading-relaxed text-[#e8e2d6]/60">
-                      {isAr ? selected.applicationsAr : selected.applicationsEn}
-                    </p>
+                ) : (
+                  <div className="flex h-full items-center justify-center">
+                    <FileText className="h-10 w-10 text-[#e8e2d6]/10" />
                   </div>
                 )}
-                {selected.pdfUrl && (
-                  <div className="mt-6 border-t border-[#e8e2d6]/10 pt-4">
-                    <a
-                      href={selected.pdfUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-md bg-[#c9a35c] px-4 py-2 text-sm font-semibold text-[#0d0d0b] transition-colors hover:bg-[#b8922f]"
-                    >
-                      <FileText size={16} />
-                      <Download size={16} />
-                      {isAr ? "تحميل الكتيب (PDF)" : "Download Brochure (PDF)"}
-                    </a>
-                  </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#11110f] via-transparent to-transparent" />
+                {category && (
+                  <span className="absolute right-2 top-2 rounded-full bg-[#c9a35c]/90 px-2.5 py-0.5 text-[10px] font-semibold text-[#0d0d0b]">
+                    {category}
+                  </span>
                 )}
               </div>
+
+              <div className="flex flex-1 flex-col p-4">
+                <h3 className="text-sm font-bold text-white">{name}</h3>
+                {desc && (
+                  <p className="mt-1.5 text-xs leading-relaxed text-[#e8e2d6]/50">
+                    {truncate(desc, 100)}
+                  </p>
+                )}
+
+                <div className="mt-auto pt-4">
+                  {m.pdfUrl ? (
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5 rounded-md bg-[#c9a35c]/10 px-2 py-1">
+                        <FileText size={11} className="text-[#c9a35c]" />
+                        <span className="text-[10px] font-medium text-[#c9a35c]">
+                          {m.pdfSize ? formatSize(m.pdfSize) : "PDF"}
+                        </span>
+                      </div>
+                      <div className="ml-auto flex gap-1">
+                        <button
+                          onClick={() => { setViewerUrl(m.pdfUrl); setViewerTitle(name) }}
+                          className="rounded-md border border-[#e8e2d6]/15 px-2.5 py-1 text-[10px] font-medium text-[#e8e2d6]/60 transition-colors hover:border-[#c9a35c]/40 hover:text-[#c9a35c]"
+                        >
+                          {isAr ? "عرض" : "View"}
+                        </button>
+                        <a
+                          href={m.pdfUrl}
+                          download
+                          className="rounded-md bg-[#c9a35c] px-2.5 py-1 text-[10px] font-semibold text-[#0d0d0b] transition-colors hover:bg-[#b8922f]"
+                        >
+                          {isAr ? "تحميل" : "Download"}
+                        </a>
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="text-[10px] text-[#e8e2d6]/20">
+                      {isAr ? "لا يوجد ملف PDF" : "No PDF available"}
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          )
+        })}
       </div>
+
+      {viewerUrl && (
+        <PdfViewer
+          url={viewerUrl}
+          title={viewerTitle}
+          onClose={() => { setViewerUrl(null); setViewerTitle("") }}
+        />
+      )}
     </PageShell>
   )
 }

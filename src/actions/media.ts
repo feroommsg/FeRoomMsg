@@ -39,8 +39,8 @@ export async function uploadMedia(base64: string, filename: string) {
     }
 
     const buffer = Buffer.from(rawBase64, "base64")
-    if (!validateImageSize(buffer.length, mimeType === "application/pdf" ? 20 : 5)) {
-      return error(mimeType === "application/pdf" ? "PDF size exceeds 20MB limit" : "Image size exceeds 5MB limit")
+    if (!validateImageSize(buffer.length, mimeType === "application/pdf" ? 50 : 5)) {
+      return error(mimeType === "application/pdf" ? "PDF size exceeds 50MB limit" : "Image size exceeds 5MB limit")
     }
 
     const isPdf = mimeType === "application/pdf"
