@@ -33,7 +33,7 @@ export async function uploadMedia(base64: string, filename: string) {
       }
     } else if (pdfMatch) {
       mimeType = pdfMatch[1]
-      rawBase64 = pdfMatch[3]
+      rawBase64 = pdfMatch[2]
     } else {
       return error("Invalid file data. Only images and PDFs are supported.")
     }
