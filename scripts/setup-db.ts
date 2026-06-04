@@ -27,7 +27,7 @@ function run(command: string, args: string[]) {
 }
 
 console.log("Database URL found. Pushing Prisma schema...")
-run("npx", ["prisma", "db", "push"])
+run("npx", ["prisma", "db", "push", "--accept-data-loss"])
 
 console.log("Seeding database defaults...")
 run("npx", ["tsx", "prisma/seed.ts"])
