@@ -112,7 +112,7 @@ export function HomeContent({
     <>
       <HeroSection
         badge={badge || (isAr ? "شركة رائدة" : "Leading Company")}
-        title={heroTitle || (isAr ? "الجدادا" : "El-Gedada")}
+        title={heroTitle || "MSG"}
         text={heroText || (isAr ? "الحلول الهندسية المتكاملة" : "Complete Engineering Solutions")}
         metrics={heroMetrics}
         bgImage={bgImage}

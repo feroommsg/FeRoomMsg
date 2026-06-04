@@ -10,7 +10,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "El-Gedada Engineering Works",
+  title: "MSG | Engineering Works",
   description: "Premium metal engineering and construction solutions",
 }
 

@@ -188,10 +188,10 @@ model MediaAsset {
 
 model SeoSettings {
   id            String   @id @default(cuid())
-  titleEn       String   @default("EL GEDADA | Engineering Works & Contracting")
-  titleAr       String   @default("الجـدادة | أعمال هندسية ومقاولات")
-  descriptionEn String   @default("EL GEDADA is a premium engineering workshop and contracting company. View our portfolio of completed projects, fabrication capabilities, and professional execution standards.")
-  descriptionAr String   @default("الجـدادة ورشة هندسية وشركة مقاولات محترفة. تصفح بورتفوليو المشاريع المنفذة، قدرات التصنيع، ومعايير التنفيذ الاحترافية.")
+  titleEn       String   @default("MSG | Engineering Works & Contracting")
+  titleAr       String   @default("MSG | أعمال هندسية ومقاولات")
+  descriptionEn String   @default("MSG is a premium engineering workshop and contracting company. View our portfolio of completed work, fabrication capabilities, and professional execution standards.")
+  descriptionAr String   @default("MSG ورشة هندسية وشركة مقاولات محترفة. تصفح بورتفوليو المشاريع المنفذة، قدرات التصنيع، ومعايير التنفيذ الاحترافية.")
   ogImageUrl    String?
   keywordsEn    String?
   keywordsAr    String?

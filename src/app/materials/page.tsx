@@ -7,12 +7,12 @@ export async function generateMetadata(): Promise<Metadata> {
   const materials = res.success ? (res.data as Record<string, any>[]) ?? [] : []
 
   return {
-    title: "Materials & Technical Catalogs | El-Gedada Engineering Works",
+    title: "Materials & Technical Catalogs | MSG Engineering Works",
     description: materials[0]
       ? `Browse our ${materials.length} technical catalogs and material specifications including ${materials.slice(0, 3).map((m) => m.nameEn).join(", ")}.`
       : "Browse our technical catalogs and material specifications for engineering and contracting projects.",
     openGraph: {
-      title: "Materials & Technical Catalogs | El-Gedada",
+      title: "Materials & Technical Catalogs | MSG",
       description: "Professional engineering material catalogs and technical documentation.",
     },
   }
