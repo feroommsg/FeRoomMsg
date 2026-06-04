@@ -12,6 +12,10 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "MSG | Engineering Works",
   description: "Premium metal engineering and construction solutions",
+  icons: {
+    icon: "/msg-logo.svg",
+    apple: "/msg-logo.svg",
+  },
 }
 
 export default async function RootLayout({
